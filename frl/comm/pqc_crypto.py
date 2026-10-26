@@ -255,7 +255,7 @@ class PQCCrypto(object):
             "direction": direction,
             "model_bytes": int(model_bytes),
             "payload_bytes": int(payload_bytes),
-            "ts": float(t0),
+            "ts": int(t0 * 1e6),   # send time in microseconds; fixed width, so the packet size does not vary
             "sig_scheme": self.scheme,
         }
 

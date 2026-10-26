@@ -1,7 +1,7 @@
-# Origin inference attack (python -m attack.run --stage ... --config attack/config.yaml)
-exp_dir: experiments/final/ATK_origin_inference
-out_dir: experiments/final/ATK_origin_inference/results/attack
-fig_dir: experiments/final/ATK_origin_inference/results/figures
+# Origin inference attack on the ATTACK runs: python -m attack.run --stage all --config attack/config.yaml
+exp_dir: experiments/final/origin_attack
+out_dir: experiments/final/origin_attack/results/attack
+fig_dir: experiments/final/origin_attack/results/figures
 ks: [1, 2, 5, 10, 20, 50, 100]   # rounds observed (first k)
 pos_inputs: [90, 91, 92, 93]     # state inputs: current edge x, y (90-91), destination x, y (92-93)
 pca_dim: 256                     # F_full: PCA of the whole update, fitted on training runs only
@@ -15,7 +15,8 @@ random_subset_draws: 5           # random-k-rounds variant on the target run
 bootstrap: 1000                  # cluster bootstrap: runs, then vehicles within runs
 seed: 0
 # attack 1, known vehicles in the same run (attack/known.py)
-known_fracs: [0.1, 0.2, 0.4]     # share of vehicles with known origin, balanced over origins (1, 2, 4 per origin)
+known_per_origin: [1]              # 1 known vehicle per origin = 10 of 50 vehicles (20%) with 10 origins
+known_default: [probe, A]        # fixed in advance (one known vehicle per origin leaves nothing to select on)
 known_draws: 5                   # random known sets per run and share
 known_C: 0.1                     # fixed L2 strength (too few known vehicles to tune it)
 known_pca_dim: 64

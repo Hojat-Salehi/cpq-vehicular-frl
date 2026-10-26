@@ -1,8 +1,8 @@
 """Origin inference attack (run from the repository root in the analysis environment):
 
-    python -m attack.run --stage all --config attack/config_ns3.yaml
+    python -m attack.run --stage all --config attack/config.yaml
 
-Input: the attack data logged by the ATKN runs (python tools/run_experiment.py ATKN).
+Input: the attack data logged by the ATTACK runs (python tools/run_experiment.py ATTACK).
 """
 import argparse
 import json

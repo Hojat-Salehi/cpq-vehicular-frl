@@ -63,7 +63,7 @@ def _log_metrics(
     payload_bytes = int(header.get("payload_bytes", 0) or 0)
 
     layers = len(weights)
-    client_ts = float(header.get("ts", 0.0) or 0.0)
+    client_ts = float(header.get("ts", 0) or 0) / 1e6
     now_ts = time.time()
     uplink_latency_ms = (now_ts - client_ts) * 1000.0 if client_ts > 0 else 0.0
 

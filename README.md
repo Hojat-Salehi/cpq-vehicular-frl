@@ -64,27 +64,25 @@ for t in tests/check_*.py; do python "$t" || echo "FAILED: $t"; done
 ## Reproducing the experiments
 
 Every run is `configs/base.yaml` plus the changes listed for it in `tools/run_experiment.py`. The launcher
-writes configs, logs and outputs to `experiments/final/<experiment>/`, runs 3 runs in parallel and skips
+writes configs, logs and outputs to `experiments/final/<output folder>/`, runs 3 runs in parallel and skips
 finished runs, so it can be restarted at any time.
 
 ```bash
 python tools/run_experiment.py E1 --dry-run        # list the runs
 python tools/run_experiment.py E1                  # run them
-python tools/analyze_experiment.py experiments/final/E1_privacy_utility    # summary tables
+python tools/analyze_experiment.py experiments/final/E1_privacy_utility   # summary tables
 ```
 
-| Command | In the paper | Runs | Time per run |
-|---|---|---|---|
-| `E1 --eps 0.3 0.5 1 2 5` | Fig. 2, Table 2: five mechanisms at ε = 0.3, 0.5, 1, 2, 5 (seeds 1–5) | 105 | 1.5 h |
-| `E1L --seeds 1 2 3 4 5` | Table 2: CPQ-λ (λ = 0.75) at ε ≠ 1 (at ε = 1 it is part of `A1`) | 20 | 1.5 h |
-| `A1`, `A1X` | Table 3, Fig. J.2: CPQ-λ ablation at ε = 1 with aggregation MSE | 20 + 40 | 1.5 h |
-| `A2` | Table J.1: number of learning vehicles | 30 | 0.7 h |
-| `E2`, `E2L` | Figs. 3–4, Table 5: 802.11p with ML-DSA-44 at ε = 1 | 25 + 5 | 3 h |
-| `E3` | Table 4, Figs. I.1, K.1: signature schemes (one seed, 30 rounds) | 6 | 0.8 h |
-| `ATKN` | Fig. 5: origin inference attack data (10 origins, ns-3) | 15 | 4 h |
+| Experiment | Output folder | Reproduces | Runs | Time per run |
+|---|---|---|---|---|
+| `E1` | `E1_privacy_utility` | Fig. 2, Table 2, Figs. J.1, J.3, J.4: all mechanisms at ε = 0.3, 0.5, 1, 2, 5 | 130 | 1.5 h |
+| `LAMBDA` | `cpq_lambda_ablation` | Table 3, Fig. J.2: CPQ-λ ablation at ε = 1, with aggregation MSE | 60 | 1.5 h |
+| `POPULATION` | `population_size` | Table J.1: 10 and 25 learning vehicles | 30 | 0.7 h |
+| `E2` | `E2_v2i_communication` | Figs. 3, 4, Table 5: 802.11p with ML-DSA-44 at ε = 1 | 30 | 3 h |
+| `E3` | `E3_signature_schemes` | Table 4, Figs. I.1, K.1: signature schemes (one seed, 30 rounds) | 6 | 0.8 h |
+| `ATTACK` | `origin_attack` | Fig. 5: data for the origin inference attack (10 origins, 802.11p) | 15 | 4 h |
 
-The attack itself runs on the logged data:
-`python -m attack.run --stage all --config attack/config_ns3.yaml`.
+The attack itself runs on the logged data: `python -m attack.run --stage all --config attack/config.yaml`.
 
 A single run can be started directly:
 
@@ -145,9 +143,23 @@ uplink is 6.89 KB and with SLH-DSA-SHA2-128f 23.34 KB. At ε = 0.3, a vehicle-or
 trained on shadow runs reaches 30% accuracy against CPQ and 22% against LDP-FL after 100 rounds, versus
 91% without privacy (chance: 10%).
 
-## Results archive
+## Results archive (Zenodo)
 
-The processed results behind the paper and the raw run outputs are archived on Zenodo: DOI to be added.
+The outputs of all runs behind the paper are archived on Zenodo: DOI to be added. The record has one
+archive per experiment, named after the output folders above (for example `E1_privacy_utility.tar.gz`). To use
+them instead of running the simulations:
+
+```bash
+mkdir -p experiments/final
+tar xzf E1_privacy_utility.tar.gz -C experiments/final/                    # one archive per experiment
+python tools/analyze_experiment.py experiments/final/E1_privacy_utility    # summary.csv, grouped.csv, curves
+python tools/summarize_run.py experiments/final/E1_privacy_utility/runs/cpq_eps1_seed1   # one run
+```
+
+Each run folder holds the configuration it was run with (`config.yaml`), the evaluation of the global model
+per round (`global_eval.csv`), per-vehicle training and evaluation logs, and, for the 802.11p experiments, every
+transfer attempt (`comm.csv`) and the participation per round (`participation.csv`). The attack data are in
+`origin_attack.tar.gz`; after extracting it, run the attack command above.
 
 ## License
 
