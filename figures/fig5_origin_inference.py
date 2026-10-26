@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 
 import matplotlib
@@ -146,5 +147,9 @@ if __name__ == '__main__':
                              'known: one known vehicle per origin (appendix)')
     parser.add_argument('--output-dir', type=Path,
                         default=Path(__file__).resolve().parent / 'output')
+    parser.add_argument('--data', type=Path, help='figure_data.json from tools/paper_results.py (default: the numbers of the paper)')
     args = parser.parse_args()
+    if args.data and 'fig5' in json.load(open(args.data)):
+        for scen, d in json.load(open(args.data))['fig5'].items():
+            DATA[scen].update({m: tuple(v) for m, v in d.items()})
     plot_attack(args.scenario, args.output_dir)

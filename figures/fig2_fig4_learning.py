@@ -7,6 +7,7 @@ Each value is the mean over 5 seeds of one block of 10 rounds (rounds 1-10, ...,
 """
 from pathlib import Path
 import argparse
+import json
 
 import numpy as np
 import matplotlib
@@ -76,6 +77,17 @@ COLORS = {'No privacy': '#383E48', 'CPQ': '#0072B2', 'CPQ-λ': '#7851A9',
 MARKERS = {'No privacy': 's', 'CPQ': 'o', 'CPQ-λ': 'v', 'LDP-FL': 'D', 'Gaussian': 's', 'Laplace': '^'}
 LINESTYLES = {'No privacy': (0, (4, 2)), 'CPQ': '-', 'CPQ-λ': (0, (4, 1.5, 1, 1.5)),
               'LDP-FL': '--', 'Gaussian': '-.', 'Laplace': (0, (1.2, 1.4))}
+
+
+def load_data(path):
+    """Replace the embedded numbers by those computed from runs (tools/paper_results.py)."""
+    d = json.load(open(path))
+    if 'fig2' in d:
+        E1_TRAVEL.clear()
+        E1_TRAVEL.update({m: v if m == 'No privacy' else {float(e): x for e, x in v.items()} for m, v in d['fig2'].items()})
+    if 'fig4' in d:
+        E2_TRAVEL.update(d['fig4']['travel'])
+        E2_AGGREGATED.update(d['fig4']['aggregated'])
 
 
 def setup_plotting():
@@ -160,7 +172,10 @@ def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('--output-dir', type=Path, default=Path(__file__).resolve().parent / 'output')
     p.add_argument('--formats', nargs='+', choices=['pdf', 'png', 'svg'], default=['pdf', 'png'])
+    p.add_argument('--data', type=Path, help='figure_data.json from tools/paper_results.py (default: the numbers of the paper)')
     args = p.parse_args()
+    if args.data:
+        load_data(args.data)
     args.output_dir.mkdir(parents=True, exist_ok=True)
     setup_plotting()
     for name, make in [('E1_learning_dynamics', figure2), ('fig4_e2_learning_and_participation', figure4)]:

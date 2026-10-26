@@ -46,7 +46,7 @@ def summarize(run_dir, window):
         'cpq_lambda': cfg['privacy']['cpq_lambda'] if method == 'cpq' else np.nan,
         'num_clients': cfg['sumo']['num_clients'], 'background_period': cfg['sumo']['background_period'],
         'ns3': ns3, 'pqc_scheme': cfg['ns3']['pqc_scheme'] if ns3 else '', 'rounds': rounds,
-        'seed': int(meta.get('env', {}).get('FL_SEED', cfg['experiment']['seeds'][0])),
+        'seed': int(meta.get('seed', meta.get('env', {}).get('FL_SEED', cfg['experiment']['seeds'][0]))),
         'commit': meta.get('commit', '')[:7], 'exit_code': meta.get('exit_code', np.nan),
         'wall_h': round(meta['wall_s'] / 3600, 2) if 'wall_s' in meta else np.nan,
     }

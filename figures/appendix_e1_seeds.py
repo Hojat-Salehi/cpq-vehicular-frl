@@ -7,6 +7,7 @@ Values per seed are each run's mean over rounds 91-100 (travel time and SUMO del
 """
 from pathlib import Path
 import argparse
+import json
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
@@ -374,7 +375,12 @@ def main():
     p.add_argument('--figure',nargs='+',choices=list(FIGURES),default=list(FIGURES))
     p.add_argument('--formats',nargs='+',choices=['pdf','svg','png'],default=['pdf','png'])
     p.add_argument('--output-dir',default=str(Path(__file__).resolve().parent/'output'))
+    p.add_argument('--data',help='figure_data.json from tools/paper_results.py (default: the numbers of the paper)')
     args=p.parse_args()
+    if args.data and 'appendix_e1' in json.load(open(args.data)):
+        d=json.load(open(args.data))['appendix_e1']
+        for k in DATA: DATA[k].update(d['DATA'][k])
+        for k in REPORTED: REPORTED[k].update(d['REPORTED'][k])
     out=Path(args.output_dir);out.mkdir(parents=True,exist_ok=True)
     for id in args.figure:
         name,fn=FIGURES[id]

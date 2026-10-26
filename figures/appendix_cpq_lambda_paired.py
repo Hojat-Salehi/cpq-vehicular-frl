@@ -6,6 +6,7 @@ relative to LDP-FL (lambda = 0) and to CPQ (lambda = 1), with 95% Student-t conf
 """
 from pathlib import Path
 import argparse
+import json
 
 import numpy as np
 import matplotlib
@@ -86,7 +87,11 @@ def plot(data, out: Path):
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('--output-dir', type=Path, default=Path(__file__).resolve().parent / 'output')
+    p.add_argument('--data', type=Path, help='figure_data.json from tools/paper_results.py (default: the numbers of the paper)')
     a = p.parse_args()
+    if a.data and 'appendix_lambda' in json.load(open(a.data)):
+        d = json.load(open(a.data))['appendix_lambda']
+        TRAVEL.update({k if k == 'LDP-FL' else float(k): v for k, v in d.items()})
     data = {k: np.array(v, float) for k, v in TRAVEL.items()}
     plot(data, a.output_dir / 'appendix_cpq_lambda_paired')
     for base, levels in [('LDP-FL', LAMBDA_LEVELS), (1.0, LAMBDA_LEVELS[:-1])]:

@@ -9,6 +9,7 @@ start of the attempt (attempts pooled over the seeds; bins with fewer than 30 at
 """
 from pathlib import Path
 import argparse
+import json
 
 import numpy as np
 import matplotlib
@@ -43,6 +44,15 @@ STYLE = {
     'Gaussian': dict(color='#D55E00', marker='s', linestyle='-.'),
     'Laplace': dict(color='#009E73', marker='^', linestyle=':'),
 }
+
+
+def load_data(path):
+    """Replace the embedded numbers by those computed from runs (tools/paper_results.py)."""
+    d = json.load(open(path)).get('fig3')
+    if d:
+        TRAFFIC_KB.update({m: tuple(v) for m, v in d['TRAFFIC_KB'].items()})
+        UPLINK_LATENCY_S.update({m: tuple(v) for m, v in d['UPLINK_LATENCY_S'].items()})
+        UPLINK_SUCCESS.update({m: tuple(v) for m, v in d['UPLINK_SUCCESS'].items()})
 
 
 def setup_plotting():
@@ -133,7 +143,10 @@ def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('--output-dir', type=Path, default=Path(__file__).resolve().parent / 'output')
     p.add_argument('--formats', nargs='+', choices=['pdf', 'png', 'svg'], default=['pdf', 'png'])
+    p.add_argument('--data', type=Path, help='figure_data.json from tools/paper_results.py (default: the numbers of the paper)')
     args = p.parse_args()
+    if args.data:
+        load_data(args.data)
     args.output_dir.mkdir(parents=True, exist_ok=True)
     setup_plotting()
     fig = figure3()

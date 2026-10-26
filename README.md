@@ -90,13 +90,18 @@ A single run can be started directly:
 FL_SEED=1 FL_OUT_DIR=results/test python run_shared.py --config configs/base.yaml
 ```
 
-## Figures
+## Tables and figures
 
-`figures/` holds one script per figure of the paper, with the numbers of the paper embedded:
+`tools/paper_results.py` computes the tables of the paper and the data of every figure from the run folders in
+`experiments/final/` (your own runs or the archived ones below); the figure scripts then plot them:
 
 ```bash
-bash figures/make_all.sh          # writes figures/output/*.pdf and *.png
+python tools/paper_results.py                                    # results/paper/tables.md, figure_data.json
+bash figures/make_all.sh --data results/paper/figure_data.json   # figures/output/*.pdf, *.png
+python tools/bench_signatures.py                                 # Table H.1 (timings depend on the machine)
 ```
+
+Without `--data`, the figure scripts plot the numbers of the paper, which are embedded in them:
 
 | Script | Figures |
 |---|---|
@@ -145,21 +150,20 @@ trained on shadow runs reaches 30% accuracy against CPQ and 22% against LDP-FL a
 
 ## Results archive (Zenodo)
 
-The outputs of all runs behind the paper are archived on Zenodo: DOI to be added. The record has one
-archive per experiment, named after the output folders above (for example `E1_privacy_utility.tar.gz`). To use
-them instead of running the simulations:
+The outputs of all runs behind the paper are archived on Zenodo: DOI to be added. There is one zip file per
+experiment, named after the output folders above; each unpacks into `experiments/final/<folder>/`. To reproduce
+the tables and figures without running the simulations:
 
 ```bash
-mkdir -p experiments/final
-tar xzf E1_privacy_utility.tar.gz -C experiments/final/                    # one archive per experiment
-python tools/analyze_experiment.py experiments/final/E1_privacy_utility    # summary.csv, grouped.csv, curves
-python tools/summarize_run.py experiments/final/E1_privacy_utility/runs/cpq_eps1_seed1   # one run
+unzip E1_privacy_utility.zip                     # in the repository root; likewise the other zip files
+python tools/paper_results.py
+bash figures/make_all.sh --data results/paper/figure_data.json
 ```
 
-Each run folder holds the configuration it was run with (`config.yaml`), the evaluation of the global model
-per round (`global_eval.csv`), per-vehicle training and evaluation logs, and, for the 802.11p experiments, every
-transfer attempt (`comm.csv`) and the participation per round (`participation.csv`). The attack data are in
-`origin_attack.tar.gz`; after extracting it, run the attack command above.
+Each run folder holds its configuration (`config.yaml`), the evaluation of the global model per round
+(`global_eval.csv`), the baselines, and, for the 802.11p experiments, every transfer attempt (`comm.csv`) and the
+participation per round (`participation.csv`). The attack can be recomputed from `origin_attack.zip` with
+`python -m attack.run --stage all --config attack/config.yaml`.
 
 ## License
 

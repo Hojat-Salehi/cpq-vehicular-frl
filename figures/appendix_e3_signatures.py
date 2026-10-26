@@ -8,6 +8,7 @@ K.1  vehicles that completed the CPQ group setup (verified SETUP_OK) per communi
 """
 from pathlib import Path
 import argparse
+import json
 
 import numpy as np
 import matplotlib as mpl
@@ -121,7 +122,12 @@ def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('--output-dir', type=Path, default=Path(__file__).resolve().parent / 'output')
     p.add_argument('--formats', nargs='+', choices=['pdf', 'png', 'svg'], default=['pdf', 'png'])
+    p.add_argument('--data', type=Path, help='figure_data.json from tools/paper_results.py (default: the numbers of the paper)')
     args = p.parse_args()
+    if args.data and 'appendix_e3' in json.load(open(args.data)):
+        d = json.load(open(args.data))['appendix_e3']
+        UPLINK_SUCCESS.update({tuple(k.split('|')): v for k, v in d['UPLINK_SUCCESS'].items()})
+        SETUP_OK.update(d['SETUP_OK'])
     args.output_dir.mkdir(parents=True, exist_ok=True)
     save(distance_success(), args.output_dir, 'fig_e3_success_distance', args.formats)
     save(setup_progress(), args.output_dir, 'fig_e3_setup_progress', args.formats)
