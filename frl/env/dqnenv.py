@@ -154,7 +154,7 @@ class dqnEnv():
 
     #     ################## changed here ##########################
     #     # Get agent-specific route file from config (CRITICAL FIX)
-    #     agent_route_file = self.config.get('randomrou', f'Rou/dqnrandom_{agent_id}.rou.xml')
+    #     agent_route_file = self.config.get('randomrou', f'sumo/rou/dqnrandom_{agent_id}.rou.xml')
     #     print(f"Agent {agent_id} using route file: {agent_route_file}")
 
     #     sumo_cmd = [
@@ -223,7 +223,7 @@ class dqnEnv():
             log_debug(f"  Attempt {attempt+1}/{max_retries}: Trying port {self.port}")
             
             # Get agent-specific route file from config
-            agent_route_file = self.config.get('randomrou', f'Rou/dqnrandom_{agent_id}.rou.xml')
+            agent_route_file = self.config.get('randomrou', f'sumo/rou/dqnrandom_{agent_id}.rou.xml')
             log_debug(f"  Using route file: {agent_route_file}")
             
             sumo_cmd = [

@@ -3,7 +3,7 @@ root in conda env sumo_env (needs sumolib): python attack/make_probe_states.py -
 
 The state layout is that of shared_env.get_state_np ('raw' encoding, 94 inputs): vehicle count per edge (30),
 mean speed per edge (30), length of lane 0 per edge (30), start of lane 0 of the current edge (x, y), start of
-lane 0 of the destination E15 (x, y). Edge order = utils.get_alledges(Net/dqn.net.xml).
+lane 0 of the destination E15 (x, y). Edge order = utils.get_alledges(sumo/net/dqn.net.xml).
 
 One probe state per (edge the vehicle is on, traffic level), 30 edges x 2 levels = 60 states:
   empty     0 vehicles, mean speed = speed limit (what SUMO reports for an empty edge)
@@ -13,9 +13,9 @@ The attacker only needs states that mean the same in every run; it knows the map
 import numpy as np
 import sumolib
 
-from utils import get_alledges
+from frl.utils import get_alledges
 
-NET, DEST = 'Net/dqn.net.xml', 'E15'
+NET, DEST = 'sumo/net/dqn.net.xml', 'E15'
 
 edges = get_alledges(NET)
 net = sumolib.net.readNet(NET)

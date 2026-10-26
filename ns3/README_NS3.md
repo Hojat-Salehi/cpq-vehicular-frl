@@ -10,7 +10,7 @@ Tested with ns-3.46, RealtimeSimulatorImpl, 802.11p ad-hoc, gcc 15 from the `sum
 ```bash
 conda activate sumo_env
 cd ~ && wget https://www.nsnam.org/releases/ns-3.46.tar.bz2 && tar xjf ns-3.46.tar.bz2
-cp <project>/ns3_integration/fl-sim.cc <project>/ns3_integration/CMakeLists.txt ~/ns-3.46/scratch/
+cp <project>/ns3/fl-sim.cc <project>/ns3/CMakeLists.txt ~/ns-3.46/scratch/
 cd ~/ns-3.46
 ./ns3 configure --build-profile=debug \
   --enable-modules="core;network;mobility;internet;wifi;applications" \

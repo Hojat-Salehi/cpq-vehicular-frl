@@ -18,9 +18,9 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 os.chdir(ROOT)
 
-import cpq_pairing
-import group_setup
-from group_setup import SetupError, Vehicle
+from frl.privacy import cpq_pairing
+from frl.privacy import group_setup
+from frl.privacy.group_setup import SetupError, Vehicle
 
 SCHEME = 'ML-DSA-44'
 failures = []

@@ -17,8 +17,8 @@ os.chdir(ROOT)
 
 import numpy as np
 
-import cpq_pairing
-import onebit
+from frl.privacy import cpq_pairing
+from frl.privacy import onebit
 
 failures = []
 

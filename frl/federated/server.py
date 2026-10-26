@@ -1,17 +1,17 @@
 import flwr as fl
 from typing import Dict, Optional, Tuple
 import tensorflow as tf
-from dqnagent import dqnAgent
-from dqn import DQN
+from frl.learning.dqnagent import dqnAgent
+from frl.learning.dqn import DQN
 import os
 import time
 import csv
 import numpy as np
 
-from pqc_oracle import get_decrypted_update
-from pqc.pqc_crypto import PQCCrypto
-from oracle_transport import OracleTransport
-from utils import require_run_id, client_veh_id, ns3_drop_undelivered
+from frl.comm.pqc_oracle import get_decrypted_update
+from frl.comm.pqc_crypto import PQCCrypto
+from frl.comm.oracle_transport import OracleTransport
+from frl.utils import require_run_id, client_veh_id, ns3_drop_undelivered
 
 os.environ["CUDA_VISIBLE_DEVICES"] = ""
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"

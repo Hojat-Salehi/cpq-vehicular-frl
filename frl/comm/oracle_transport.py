@@ -7,7 +7,7 @@ import csv
 import json
 import struct
 from typing import Any, Dict, Optional, Tuple, List
-from utils import require_run_id
+from frl.utils import require_run_id
 
 # LOGGING
 RUN_ID = require_run_id()

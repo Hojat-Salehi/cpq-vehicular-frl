@@ -17,7 +17,7 @@ os.chdir(ROOT)
 
 import numpy as np
 
-import additive
+from frl.privacy import additive
 
 failures = []
 

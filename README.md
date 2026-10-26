@@ -10,25 +10,28 @@ experiments, carried over a packet-level IEEE 802.11p channel simulated in ns-3.
 
 ## Repository layout
 
-| Path | Content |
-|---|---|
-| `run_shared.py` | One federated run: all learning vehicles in one SUMO world, rounds of local DQN training and aggregation |
-| `shared_env.py`, `shared_train.py`, `dqnenv.py` | SUMO environment, episodes, evaluation |
-| `dqnagent.py`, `dqn.py` | DQN agent and network |
-| `onebit.py` | One-bit quantizers: CPQ, CPQ-λ and LDP-FL (encoding and server decoding) |
-| `cpq_pairing.py`, `group_setup.py` | Server-hidden per-coordinate pairing of CPQ and the ML-KEM group-key setup |
-| `additive.py` | Gaussian and Laplace mechanisms |
-| `comm.py`, `ns3_link.py` | Model exchange over ns-3 (downlink / uplink drives, RSU scheduling) |
-| `pqc/`, `pqc_oracle.py`, `oracle_transport.py` | Post-quantum signatures (liboqs) |
-| `server.py`, `server_onebit.py`, `run_server.py`, `run_client.py` | Aggregation strategies and the per-vehicle client |
-| `mse_log.py`, `attack_log.py` | Optional logging: aggregation MSE, data for the origin inference attack |
-| `attack/` | Vehicle-origin inference attack |
-| `ns3_integration/` | ns-3 program (`fl-sim.cc`): 802.11p channel, RSU, SR-ARQ transport |
-| `configs/base.yaml` | Configuration shared by all experiments |
-| `tools/run_experiment.py` | Launches the runs of one experiment (configs, seeds, parallel runs) |
-| `tools/analyze_experiment.py` | Result tables of one experiment from its run folders |
-| `Net/`, `Add/`, `dqn.sumocfg` | SUMO road network, detectors and configuration |
-| `tests/` | Checks of the mechanisms, pairing, group setup, DQN and environment |
+```
+cpq-vehicular-frl/
+├── run_shared.py        one federated run (entry point)
+├── configs/base.yaml    configuration shared by all experiments
+├── frl/                 Python package
+│   ├── learning/        DQN network and agent (dqn.py, dqnagent.py)
+│   ├── env/             SUMO environment, episodes, evaluation (shared_env.py, shared_train.py, dqnenv.py)
+│   ├── privacy/         CPQ, CPQ-λ, LDP-FL (onebit.py), server-hidden pairing (cpq_pairing.py),
+│   │                    ML-KEM group-key setup (group_setup.py), Gaussian / Laplace (additive.py)
+│   ├── federated/       aggregation strategies and the vehicle client (server*.py, run_server.py, run_client.py)
+│   ├── comm/            model exchange over ns-3 (comm.py, ns3_link.py) and PQC signatures (pqc_crypto.py)
+│   ├── monitoring/      optional logs: aggregation MSE (mse_log.py), attack data (attack_log.py)
+│   └── utils.py
+├── sumo/                road network (net/), detectors (add/), routes (rou/), dqn.sumocfg
+├── ns3/                 ns-3 program fl-sim.cc: 802.11p channel, RSU, SR-ARQ transport
+├── attack/              vehicle-origin inference attack
+├── tools/               run_experiment.py (launch an experiment), analyze_experiment.py (result tables)
+├── tests/               checks of the mechanisms, pairing, group setup, DQN and environment
+└── docs/                architecture figure
+```
+
+All commands are run from the repository root.
 
 ## Requirements
 
@@ -37,7 +40,7 @@ Tested on Ubuntu 20.04 with:
 - Python 3.10
 - SUMO 1.26.0 (`eclipse-sumo` from pip, or a system install with `SUMO_HOME` set)
 - liboqs 0.15.0 and liboqs-python 0.14.1
-- ns-3.46 (only for the experiments with communication), see `ns3_integration/README_NS3.md`
+- ns-3.46 (only for the experiments with communication), see `ns3/README_NS3.md`
 
 ```bash
 conda create -n cpq-frl python=3.10

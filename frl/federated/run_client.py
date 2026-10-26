@@ -26,11 +26,11 @@ import tensorflow as tf
 from typing import Dict, Tuple
 from flwr.common import NDArrays, Scalar
 
-from dqnagent import dqnAgent
-from shared_env import SharedSumoEnv
-from shared_train import (AgentSlot, draw_departures, evaluate as evaluate_episodes,
+from frl.learning.dqnagent import dqnAgent
+from frl.env.shared_env import SharedSumoEnv
+from frl.env.shared_train import (AgentSlot, draw_departures, evaluate as evaluate_episodes,
                           generate_background, greedy_policy, summarize, train_round)
-from utils import (
+from frl.utils import (
     checkSumo, parseConfig, get_alledges, calculate_connections, save_data,
 )
 from xml.etree.ElementTree import parse as xml_parse
@@ -136,7 +136,7 @@ class flowerClient(fl.client.NumPyClient):
         # logical clients (one per sub-round). We create all their CSV files
         # here at startup so they exist before any fit() call.
         # The shared-environment loop writes its own CSVs (create_csvs=False).
-        from utils import setup_csv_stable
+        from frl.utils import setup_csv_stable
         _batches   = int(dqn_config.get('batches_per_agg', 1)) if create_csvs else 0
         _n_clients = int(dqn_config.get('num_clients', 10))
         _out_dir   = dqn_config.get('out_dir', 'results')
@@ -185,9 +185,9 @@ class flowerClient(fl.client.NumPyClient):
         if self.use_ns3:
             # These imports trigger require_run_id() at module level — safe now
             # because utils.require_run_id() auto-generates if FL_RUN_ID is unset.
-            from pqc_oracle import send_pqc_update as _spu
-            from pqc.pqc_crypto import PQCCrypto, verify_and_unpack_packet
-            from oracle_transport import OracleTransport
+            from frl.comm.pqc_oracle import send_pqc_update as _spu
+            from frl.comm.pqc_crypto import PQCCrypto, verify_and_unpack_packet
+            from frl.comm.oracle_transport import OracleTransport
 
             self._verify_and_unpack = verify_and_unpack_packet
             self._send_pqc_update   = _spu
@@ -257,7 +257,7 @@ class flowerClient(fl.client.NumPyClient):
         """(K_pair, K_coin, own position, group size) from the group secret (cpq_pairing: local).
         Agreed group = all vehicles of the run, ordered by id."""
         if getattr(self, '_pair_keys', None) is None:
-            import cpq_pairing
+            from frl.privacy import cpq_pairing
             roster = [f'veh{k}' for k in range(int(self.dqn_config['num_clients']))]
             if self.dqn_config.get('cpq_group_key', 'seeded') == 'seeded':
                 secret = cpq_pairing.seeded_group_secret(int(self.dqn_config['seed']))
@@ -386,8 +386,8 @@ class flowerClient(fl.client.NumPyClient):
 
         # ── 5. Apply DP perturbation ─────────────────────────────────────────
         if self.method in ('cpq', 'ldpfl'):
-            import onebit
-            from dqn import LAYER_NAMES
+            from frl.privacy import onebit
+            from frl.learning.dqn import LAYER_NAMES
             radii = onebit.radii_for(ctx['base'], self.dqn_config['clip_radius'], LAYER_NAMES)
             if self.method == 'cpq' and ctx['pair_seed'] is not None:
                 seed = int(ctx['pair_seed'])            # shared with the pair partner
@@ -396,13 +396,13 @@ class flowerClient(fl.client.NumPyClient):
             own_seed = int(np.random.SeedSequence([int(self.num_seed), int(round_num)]).generate_state(1)[0])
             shared_V = None
             if self.method == 'cpq' and self.dqn_config.get('cpq_pairing', 'server') == 'local':
-                import cpq_pairing
+                from frl.privacy import cpq_pairing
                 kp, kc, index, n = self._group_pairing_keys()
                 per_coord = self.dqn_config.get('cpq_pairing_granularity', 'client') == 'coordinate'
                 shared_V = cpq_pairing.shared_values(kp, kc, round_num, index, n,
                                                      [w.shape for w in trained_weights], own_seed, per_coord)
             elif self.method == 'cpq' and ctx['pairing'] == 'coordinate':
-                import cpq_pairing
+                from frl.privacy import cpq_pairing
                 shared_V = cpq_pairing.coordinate_values(int(ctx['pairing_seed']), round_num, int(ctx['client_idx']),
                                                          int(ctx['n_clients']), [w.shape for w in trained_weights],
                                                          own_seed)
@@ -415,9 +415,9 @@ class flowerClient(fl.client.NumPyClient):
                   f"{[round(c, 4) for c in clipped]}")
 
         elif self.method in ('gaussian', 'laplace'):
-            import additive
-            from dqn import LAYER_NAMES
-            import onebit
+            from frl.privacy import additive
+            from frl.learning.dqn import LAYER_NAMES
+            from frl.privacy import onebit
             radii = onebit.radii_for(ctx['base'], self.dqn_config['clip_radius'], LAYER_NAMES)
             seed = int(np.random.SeedSequence([int(self.num_seed), int(round_num)]).generate_state(1)[0])
             send_weights, clipped = additive.perturb(trained_weights, ctx['base'], radii, self.privacy_epsilon,
@@ -450,7 +450,7 @@ class flowerClient(fl.client.NumPyClient):
     # ─────────────────────────────────────────────────────────────────────────
     def evaluate(self, parameters: NDArrays, config) -> Tuple[float, int, Dict]:
         """Greedy evaluation of the global model on this vehicle's static scenarios."""
-        from dqn import DQN
+        from frl.learning.dqn import DQN
         round_num = int(config.get('round', 0))
         num_eval_episodes = int(config.get('eval_episodes', 3))
         print(f"\n[CLIENT {self.veh}] ===== EVAL Round {round_num} | eps=0 | {num_eval_episodes} scenarios =====")
@@ -462,7 +462,7 @@ class flowerClient(fl.client.NumPyClient):
 
         env, slot = self._episode_env()
         eval_slot = AgentSlot(self.veh, None, slot.start_edges)
-        files = [f"Rou/eval_{self.veh}_scenario_{i}.rou.xml" for i in range(num_eval_episodes)]
+        files = [f"sumo/rou/eval_{self.veh}_scenario_{i}.rou.xml" for i in range(num_eval_episodes)]
         # Same fixed departure times per scenario as the shared environment
         cfg = self.dqn_config
         vehs = [f'veh{k}' for k in range(int(cfg.get('num_clients', 1)))]
@@ -481,10 +481,10 @@ class flowerClient(fl.client.NumPyClient):
 #  Main entry point
 # ─────────────────────────────────────────────────────────────────────────────
 if __name__ == '__main__':
-    net       = 'Net/dqn.net.xml'
-    add       = 'Add/dqn.add.xml'
-    det       = 'Add/dqn.det.xml'
-    sumocfg   = 'dqn.sumocfg'
+    net       = 'sumo/net/dqn.net.xml'
+    add       = 'sumo/add/dqn.add.xml'
+    det       = 'sumo/add/dqn.det.xml'
+    sumocfg   = 'sumo/dqn.sumocfg'
     dirResult = 'Result/dqn'
     dirModel  = 'Avg_Saved_Models/'
     fcdoutput = 'Output/dqn.fcdoutput.xml'
@@ -502,8 +502,8 @@ if __name__ == '__main__':
 
     veh_index  = int(args.vehicle)
     veh_id     = f'veh{veh_index}'
-    trip       = f'Rou/dqn_{veh_index}.trip.xml'
-    randomrou  = f'Rou/dqnrandom_{veh_index}.rou.xml'
+    trip       = f'sumo/rou/dqn_{veh_index}.trip.xml'
+    randomrou  = f'sumo/rou/dqnrandom_{veh_index}.rou.xml'
 
     edgelists      = get_alledges(net)
     state_size     = SharedSumoEnv.state_dim(config['state_encoding'], len(edgelists))

@@ -25,7 +25,7 @@ def find_fl_sim(ns3_dir):
                                          'ns3.*-fl-sim-*')))
     if not hits:
         raise FileNotFoundError(f'fl-sim binary not found under {ns3_dir}/build/scratch '
-                                '(see ns3_integration/README_NS3.md)')
+                                '(see ns3/README_NS3.md)')
     return hits[0]
 
 

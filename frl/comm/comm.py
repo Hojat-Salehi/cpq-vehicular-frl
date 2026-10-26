@@ -36,9 +36,9 @@ import math
 import os
 from collections import namedtuple
 
-from ns3_link import Ns3Link
-from pqc.pqc_crypto import PQCCrypto, verify_and_unpack_packet
-from shared_train import own_greedy_policy, run_episode
+from frl.comm.ns3_link import Ns3Link
+from frl.comm.pqc_crypto import PQCCrypto, verify_and_unpack_packet
+from frl.env.shared_train import own_greedy_policy, run_episode
 
 COMM_HEADER = ['FL_Round', 'Direction', 'Vehicle', 'Msg_Id', 'Attempt', 'Start_Time', 'End_Time',
                'Duration', 'Outcome', 'Wire_Bytes', 'Dist_Start', 'Dist_End', 'Queue_Wait', 'Message']

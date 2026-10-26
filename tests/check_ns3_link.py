@@ -1,6 +1,6 @@
 # tests/check_ns3_link.py
 # Checks for ns-3 lockstep mode (fl-sim --lockstep, ns3_link.py) and the communication drives
-# (comm.py). Needs the fl-sim binary (ns3_integration/README_NS3.md).
+# (comm.py). Needs the fl-sim binary (ns3/README_NS3.md).
 #   python tests/check_ns3_link.py        (inside sumo_env, from the repo root)
 #
 # 1. motion       positions and constant-velocity motion set from Python are what ns-3 uses
@@ -28,11 +28,20 @@ os.environ.setdefault('TF_CPP_MIN_LOG_LEVEL', '3')
 
 import numpy as np
 
-from ns3_link import Ns3Link
+from frl.comm.ns3_link import Ns3Link
 
 NS3_DIR = '~/ns-3.46'
 RSU = (300.0, 100.0)
+ROUTE = 'sumo/rou/eval_shared_p3_scenario_0.rou.xml'
 failures = []
+
+
+def eval_route():
+    """Evaluation traffic used by the drive tests (generated once, same as tests/check_shared_env.py)."""
+    if not os.path.exists(ROUTE):
+        from frl.env import shared_train
+        shared_train.generate_eval_scenario('sumo/net/dqn.net.xml', ROUTE, seed=1000)
+    return ROUTE
 
 
 def check(name, ok, detail=''):
@@ -109,7 +118,7 @@ def test_distance_and_determinism():
 
 
 def test_signatures():
-    from pqc.pqc_crypto import PQCCrypto, verify_and_unpack_packet
+    from frl.comm.pqc_crypto import PQCCrypto, verify_and_unpack_packet
     crypto = PQCCrypto({'scheme': 'ML-DSA-44', 'key_dir': 'pqc_keys'})
     w = [np.arange(12, dtype=np.float32).reshape(3, 4), np.ones(3, dtype=np.uint8)]
     pkt = crypto._build_packet('veh0', 3, w, 'uplink')['packet']
@@ -128,21 +137,21 @@ def test_signatures():
 
 def test_drive():
     """One downlink drive with 4 vehicles in SUMO through CommManager."""
-    import shared_train
-    from comm import CommManager
-    from dqnagent import dqnAgent
-    from run_client import get_alldets
-    from shared_env import SharedSumoEnv
-    from utils import calculate_connections, checkSumo, get_alledges
+    from frl.env import shared_train
+    from frl.comm.comm import CommManager
+    from frl.learning.dqnagent import dqnAgent
+    from frl.federated.run_client import get_alldets
+    from frl.env.shared_env import SharedSumoEnv
+    from frl.utils import calculate_connections, checkSumo, get_alledges
     _, sumolib = checkSumo()
-    net = 'Net/dqn.net.xml'
+    net = 'sumo/net/dqn.net.xml'
     edges = get_alledges(net)
     conn = calculate_connections(edges, net)
     cfg = {'use_gui': False, 'start': True, 'quit_on_end': True, 'veh_id': 0,
            'ns3': {'ns3_dir': NS3_DIR, 'fl_sim_args': '--propModel=none', 'coverage_radius': 150,
                    'discovery': 'distance'},
            'pqc': {'scheme': 'ML-DSA-44', 'key_dir': 'pqc_keys'}}
-    env = SharedSumoEnv(sumolib.checkBinary('sumo'), 'dqn.sumocfg', edges, get_alldets(edges), conn,
+    env = SharedSumoEnv(sumolib.checkBinary('sumo'), 'sumo/dqn.sumocfg', edges, get_alldets(edges), conn,
                         'E15', 94, 3, cfg)
     starts = [['E0'], ['E1'], ['E3'], ['E11']]
     slots = [shared_train.AgentSlot(f'veh{i}', dqnAgent(f'veh{i}', i, edges, conn, 94, 3, 1, '/tmp'),
@@ -152,7 +161,7 @@ def test_drive():
     # 1.6 MB: a transfer lasts a few seconds, so vehicles arriving meanwhile must queue
     w = [np.random.default_rng(1).normal(size=(400, 1000)).astype(np.float32)]
     packets = {s.veh: comm.packet(s.veh, 1, w, 'downlink') for s in slots}
-    route = 'Rou/eval_shared_p3_scenario_0.rou.xml'
+    route = eval_route()
     # all depart together, so several vehicles are in coverage at the same time
     got = comm.run_drive(env, slots, route, {s.veh: 50.0 for s in slots}, 600, 'downlink', 1, packets)
     comm.close()
@@ -189,21 +198,21 @@ def test_beacons():
 
 
 def test_beacon_drive():
-    import shared_train
-    from comm import CommManager
-    from dqnagent import dqnAgent
-    from run_client import get_alldets
-    from shared_env import SharedSumoEnv
-    from utils import calculate_connections, checkSumo, get_alledges
+    from frl.env import shared_train
+    from frl.comm.comm import CommManager
+    from frl.learning.dqnagent import dqnAgent
+    from frl.federated.run_client import get_alldets
+    from frl.env.shared_env import SharedSumoEnv
+    from frl.utils import calculate_connections, checkSumo, get_alledges
     _, sumolib = checkSumo()
-    net = 'Net/dqn.net.xml'
+    net = 'sumo/net/dqn.net.xml'
     edges = get_alledges(net)
     conn = calculate_connections(edges, net)
     cfg = {'use_gui': False, 'start': True, 'quit_on_end': True, 'veh_id': 0,
            'ns3': {'ns3_dir': NS3_DIR, 'fl_sim_args': '', 'discovery': 'beacon',
                    'beacon_interval': 0.1, 'beacon_timeout': 0.5, 'coverage_radius': 150},
            'pqc': {'scheme': 'ML-DSA-44', 'key_dir': 'pqc_keys'}}
-    env = SharedSumoEnv(sumolib.checkBinary('sumo'), 'dqn.sumocfg', edges, get_alldets(edges), conn,
+    env = SharedSumoEnv(sumolib.checkBinary('sumo'), 'sumo/dqn.sumocfg', edges, get_alldets(edges), conn,
                         'E15', 94, 3, cfg)
     starts = [['E0'], ['E1'], ['E3'], ['E11']]
     slots = [shared_train.AgentSlot(f'veh{i}', dqnAgent(f'veh{i}', i, edges, conn, 94, 3, 1, '/tmp'),
@@ -212,7 +221,7 @@ def test_beacon_drive():
     comm = CommManager(cfg, [s.veh for s in slots], tmp, RSU)
     w = [np.random.default_rng(1).normal(size=(94, 150)).astype(np.float32)]
     packets = {s.veh: comm.packet(s.veh, 1, w, 'uplink') for s in slots}
-    got = comm.run_drive(env, slots, 'Rou/eval_shared_p3_scenario_0.rou.xml',
+    got = comm.run_drive(env, slots, eval_route(),
                          {s.veh: 50.0 + 10 * i for i, s in enumerate(slots)}, 600, 'uplink', 1, packets)
     comm.close()
     env.close()

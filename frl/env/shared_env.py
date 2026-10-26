@@ -10,12 +10,12 @@ import os
 
 import numpy as np
 
-from dqnenv import dqnEnv, traci
+from frl.env.dqnenv import dqnEnv, traci
 
 
 class SharedSumoEnv(dqnEnv):
     LABEL = 'shared'
-    EMPTY_ROUTES = 'Rou/empty.rou.xml'
+    EMPTY_ROUTES = 'sumo/rou/empty.rou.xml'
 
     def __init__(self, sumoBinary, cfg_file, edgelists, alldets, dict_connection,
                  destination, state_size, action_size, config):

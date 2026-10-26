@@ -34,7 +34,7 @@ def stage_test(cfg):
     gives the server's next global model (logged independently) in every round (with ns-3: the updates that
     arrived; a round without any keeps the global model); for one-bit methods every decoded coordinate is
     w_g +- alpha * r."""
-    import onebit
+    from frl.privacy import onebit
     res = []
     for (m, e), runs in sorted(dataset.finished_runs(cfg['exp_dir']).items(), key=lambda x: (x[0][0], x[0][1] or 0)):
         for r in runs:

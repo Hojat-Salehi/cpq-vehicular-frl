@@ -7,7 +7,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
 
-from dqn import DQN
+from frl.learning.dqn import DQN
 
 
 class dqnAgent:

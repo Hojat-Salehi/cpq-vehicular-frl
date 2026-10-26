@@ -34,14 +34,14 @@ os.environ.setdefault('TF_CPP_MIN_LOG_LEVEL', '3')
 import numpy as np
 import tensorflow as tf
 
-import shared_train
-from dqnagent import dqnAgent
-from run_client import generate_lanedetectionfile, get_alldets
-from shared_env import SharedSumoEnv
-from utils import calculate_connections, checkSumo, get_alledges
+from frl.env import shared_train
+from frl.learning.dqnagent import dqnAgent
+from frl.federated.run_client import generate_lanedetectionfile, get_alldets
+from frl.env.shared_env import SharedSumoEnv
+from frl.utils import calculate_connections, checkSumo, get_alledges
 
-NET, DET, SUMOCFG, DEST = 'Net/dqn.net.xml', 'Add/dqn.det.xml', 'dqn.sumocfg', 'E15'
-ROUTE = 'Rou/eval_shared_p3_scenario_0.rou.xml'
+NET, DET, SUMOCFG, DEST = 'sumo/net/dqn.net.xml', 'sumo/add/dqn.det.xml', 'sumo/dqn.sumocfg', 'E15'
+ROUTE = 'sumo/rou/eval_shared_p3_scenario_0.rou.xml'
 START_EDGES = [['E0'], ['E1'], ['E3'], ['E11'], ['E8']]
 T_MAX = 600.0
 
@@ -296,19 +296,19 @@ def test_fast_paths(binary, edgelists, alldets, conn, cfg, episodes=25):
 
 def test_old_layout(binary, edgelists, alldets, conn, cfg):
     """run_client.flowerClient (one vehicle per SUMO) trains and evaluates through shared_train."""
-    from run_client import flowerClient
+    from frl.federated.run_client import flowerClient
     tmp = tempfile.mkdtemp()
     dqn_cfg = dict(cfg, method='none', use_ns3=False, batches_per_agg=1, num_clients=2,
                    out_dir=tmp, max_trip_time=T_MAX, true_rounds=1, background_period=3,
                    warmup=60, depart_window=30)
     agent = dqnAgent('veh1', 1, edgelists, conn, 94, 3, 2, tmp)
     client = flowerClient(agent, False, binary, False, 2, NET, os.path.join(tmp, 't.trip.xml'),
-                          os.path.join(tmp, 'r.rou.xml'), 'Add/dqn.add.xml', tmp, tmp, SUMOCFG,
+                          os.path.join(tmp, 'r.rou.xml'), 'sumo/add/dqn.add.xml', tmp, tmp, SUMOCFG,
                           None, edgelists, alldets, conn, 'veh1', DEST, 94, 3, dqn_cfg, 1, None)
     weights, _, _ = client.fit(agent.model.get_weights(), {'round': 1})
     rows = open(os.path.join(tmp, 'veh1_train.csv')).read().strip().splitlines()
     for j in range(2):
-        path = f'Rou/eval_veh1_scenario_{j}.rou.xml'
+        path = f'sumo/rou/eval_veh1_scenario_{j}.rou.xml'
         if not os.path.exists(path):
             shared_train.generate_eval_scenario(NET, path, seed=1100 + j)
     loss, n_eval, m = client.evaluate(weights, {'round': 1, 'eval_episodes': 2})

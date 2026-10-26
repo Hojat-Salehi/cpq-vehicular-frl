@@ -190,7 +190,7 @@ def main():
     p.add_argument('--methods', nargs='*', help='only these methods')
     p.add_argument('--seeds', type=int, nargs='*', help='only these seeds')
     p.add_argument('--max-parallel', type=int, default=3)
-    p.add_argument('--stagger', type=float, default=45, help='s between two starts (shared startup file Add/dqn.det.xml)')
+    p.add_argument('--stagger', type=float, default=45, help='s between two starts (shared startup file sumo/add/dqn.det.xml)')
     p.add_argument('--min-free-gb', type=float, default=3.0, help='wait with the next start while less memory is available')
     p.add_argument('--dry-run', action='store_true')
     args = p.parse_args()

@@ -1,8 +1,8 @@
 <configuration>
     <input>
-        <net-file value="./Net/dqn.net.xml"/>
-        <additional-files value="./Add/dqn.det.xml"/>
-        <route-files value='./Rou/dqnrandom.rou.xml'/>
+        <net-file value="net/dqn.net.xml"/>
+        <additional-files value="add/dqn.det.xml"/>
+        <route-files value='rou/dqnrandom.rou.xml'/>
         <gui-settings-file value="rl1.settings.xml"/>
     </input>
     

@@ -20,11 +20,11 @@ from typing import Dict, List, Optional, Tuple
 import flwr as fl
 import numpy as np
 
-import onebit
-from dqn import LAYER_NAMES
-from main_dp_func import federated_learning_pairing, get_seed_for_client
-from server import PqcFedAvg, _wait_for_pqc_npz
-from utils import client_veh_id, ns3_drop_undelivered
+from frl.privacy import onebit
+from frl.learning.dqn import LAYER_NAMES
+from frl.federated.main_dp_func import federated_learning_pairing, get_seed_for_client
+from frl.federated.server import PqcFedAvg, _wait_for_pqc_npz
+from frl.utils import client_veh_id, ns3_drop_undelivered
 
 
 class OneBitStrategy(PqcFedAvg):

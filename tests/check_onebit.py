@@ -22,7 +22,7 @@ os.environ.setdefault('TF_CPP_MIN_LOG_LEVEL', '3')
 
 import numpy as np
 
-import onebit
+from frl.privacy import onebit
 
 failures = []
 
@@ -111,7 +111,7 @@ def test_server():
     from flwr.common import Code, FitRes, GetPropertiesRes, Status
     from flwr.server.client_manager import SimpleClientManager
     from flwr.server.client_proxy import ClientProxy
-    from server_onebit import OneBitStrategy
+    from frl.federated.server_onebit import OneBitStrategy
 
     class Proxy(ClientProxy):
         def get_properties(self, ins, timeout, group_id):

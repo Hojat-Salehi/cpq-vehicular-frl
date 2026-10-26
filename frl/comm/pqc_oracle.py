@@ -6,8 +6,8 @@ import socket
 from typing import Any, Dict, List, Tuple, Optional
 from pathlib import Path
 import numpy as np
-from pqc.pqc_crypto import verify_and_unpack_packet
-from utils import require_run_id
+from frl.comm.pqc_crypto import verify_and_unpack_packet
+from frl.utils import require_run_id
 
 # LOGGING
 RUN_ID = require_run_id()

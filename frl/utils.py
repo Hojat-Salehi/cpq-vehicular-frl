@@ -59,7 +59,7 @@ def setup_csv_stable(out_dir, veh_id, trained):
     Safe to call multiple times — if the file already exists it is left intact
     so data is not wiped on reconnect. Columns: shared_train.CSV_HEADER.
     """
-    from shared_train import CSV_HEADER
+    from frl.env.shared_train import CSV_HEADER
     out_dir = os.path.abspath(out_dir)
     if not os.path.exists(out_dir):
         os.mkdir(out_dir)
@@ -79,7 +79,7 @@ def setup_eval_csv(out_dir, method, run_id):
     file_path = os.path.join(out_dir, 'global_eval.csv')
     with open(file_path, 'w', newline='') as f:
         writer = csv.writer(f)
-        from shared_train import EVAL_SUMMARY_HEADER
+        from frl.env.shared_train import EVAL_SUMMARY_HEADER
         writer.writerow(EVAL_SUMMARY_HEADER)
     return file_path
 

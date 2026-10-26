@@ -8,7 +8,7 @@ import os
 
 import numpy as np
 
-import onebit
+from frl.privacy import onebit
 
 
 def load_meta(run_dir):

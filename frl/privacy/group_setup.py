@@ -28,8 +28,8 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 
-import cpq_pairing
-from pqc.pqc_crypto import load_or_create_keypair
+from frl.privacy import cpq_pairing
+from frl.comm.pqc_crypto import load_or_create_keypair
 
 KEM = 'ML-KEM-512'
 MAGIC = b'CPQS'

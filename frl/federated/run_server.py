@@ -12,7 +12,7 @@ os.environ['CUDA_VISIBLE_DEVICES'] = ''
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 import flwr as fl
-from utils import parseConfig, require_run_id
+from frl.utils import parseConfig, require_run_id
 
 
 def make_fit_config_fn(batches_per_agg: int, true_rounds: int):
@@ -39,7 +39,7 @@ def build_strategy(cfg, **common_kwargs):
     lam     = cfg['lambda_smooth']
     if method in ('cpq', 'ldpfl'):
         # One-bit private quantization of the update (onebit.py, server_onebit.py)
-        from server_onebit import OneBitStrategy
+        from frl.federated.server_onebit import OneBitStrategy
         strategy = OneBitStrategy(
             method       = method,
             epsilon      = epsilon,
@@ -56,7 +56,7 @@ def build_strategy(cfg, **common_kwargs):
         # Standard FedAvg — float weights, no binary decode needed.
         # We use PqcFedAvg from server.py but with oracle disabled so it
         # never waits for .npz files and immediately uses gRPC weights.
-        from server import PqcFedAvg
+        from frl.federated.server import PqcFedAvg
         strategy = PqcFedAvg(**common_kwargs)
         print(f'[SERVER] Strategy: PqcFedAvg (standard FedAvg, method={method})')
 
@@ -185,7 +185,7 @@ if __name__ == '__main__':
     print(f'[SERVER] n_rounds   = {n_rounds}')
     print(f'[SERVER] use_ns3    = {use_ns3}')
 
-    from utils import setup_eval_csv
+    from frl.utils import setup_eval_csv
     eval_csv_path = setup_eval_csv(cfg['out_dir'], method, RUN_ID)
     print(f'[SERVER] Eval CSV  = {eval_csv_path}')
 
@@ -224,9 +224,9 @@ if __name__ == '__main__':
         print('[SERVER] Batch accumulation DISABLED (batches_per_agg=1)')
 
 
-    from utils import save_data
+    from frl.utils import save_data
 
-    from shared_train import summary_row
+    from frl.env.shared_train import summary_row
 
     def _aggregate_evaluate(self, server_round, results, failures):
         sums = [eval_res.metrics for _, eval_res in results if 'tt_sum' in eval_res.metrics]

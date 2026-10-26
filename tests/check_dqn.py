@@ -17,7 +17,7 @@ os.environ.setdefault('TF_CPP_MIN_LOG_LEVEL', '3')
 
 import numpy as np
 
-from dqnagent import dqnAgent
+from frl.learning.dqnagent import dqnAgent
 
 S, A, GAMMA = 4, 3, 0.99
 failures = []

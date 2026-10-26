@@ -50,19 +50,19 @@ from flwr.common import Code, FitRes, GetPropertiesRes, Status
 from flwr.server.client_manager import SimpleClientManager
 from flwr.server.client_proxy import ClientProxy
 
-from dqn import DQN
-from dqnagent import dqnAgent
-from run_client import flowerClient, generate_lanedetectionfile, get_alldets
-from run_server import build_strategy, get_eval_fn, make_fit_config_fn
-from shared_env import SharedSumoEnv
-from shared_train import (CSV_HEADER, EVAL_SUMMARY_HEADER, ROAD_HEADER, AgentSlot,
+from frl.learning.dqn import DQN
+from frl.learning.dqnagent import dqnAgent
+from frl.federated.run_client import flowerClient, generate_lanedetectionfile, get_alldets
+from frl.federated.run_server import build_strategy, get_eval_fn, make_fit_config_fn
+from frl.env.shared_env import SharedSumoEnv
+from frl.env.shared_train import (CSV_HEADER, EVAL_SUMMARY_HEADER, ROAD_HEADER, AgentSlot,
                           background_csv, draw_departures, evaluate, generate_background,
                           generate_eval_scenario, greedy_policy, router_policy, run_episode,
                           summarize, summary_row, train_round)
-from utils import (calculate_connections, checkSumo, get_alledges, parseConfig,
+from frl.utils import (calculate_connections, checkSumo, get_alledges, parseConfig,
                    require_run_id, save_data)
 
-NET, ADD, DET, SUMOCFG = 'Net/dqn.net.xml', 'Add/dqn.add.xml', 'Add/dqn.det.xml', 'dqn.sumocfg'
+NET, ADD, DET, SUMOCFG = 'sumo/net/dqn.net.xml', 'sumo/add/dqn.add.xml', 'sumo/add/dqn.det.xml', 'sumo/dqn.sumocfg'
 DIR_RESULT, FCD = 'Result/dqn', 'Output/dqn.fcdoutput.xml'
 DESTINATION, ACTION_SIZE = 'E15', 3
 
@@ -198,10 +198,11 @@ def main():
     # The strategies' own ns-3 oracle path (separate processes) is not used here
     os.environ['FL_PQC_ENABLED'] = os.environ['FL_ORACLE_ENABLED'] = '0'
     # Origin inference attack (attack_log.py): log what the server receives, with FL_ATTACK_LOG=1
-    import attack_log
+    from frl.monitoring import attack_log
     alog = attack_log.AttackLog(out_dir, cfg, slots, LAYER_NAMES, NET) if attack_log.enabled() else None
     # Aggregation error of the privacy mechanism (mse_log.py), with FL_MSE_LOG=1
-    import mse_log, onebit
+    from frl.monitoring import mse_log
+    from frl.privacy import onebit
     mlog = (mse_log.MseLog(out_dir, LAYER_NAMES, lambda b: onebit.radii_for(b, cfg['clip_radius'], LAYER_NAMES))
             if mse_log.enabled() and method != 'none' else None)
 
@@ -229,7 +230,7 @@ def main():
     comm, versions, part_csv = None, {v: 0 for v in vehs}, None
     if cfg['use_ns3']:
         import sumolib as _sumolib
-        from comm import CommManager
+        from frl.comm.comm import CommManager
         rsu = _sumolib.net.readNet(NET).getNode(cfg['ns3']['rsu_junction']).getCoord()
         comm = CommManager(cfg, vehs, out_dir, rsu)
         part_csv = _new_csv(os.path.join(out_dir, 'participation.csv'),
@@ -251,7 +252,7 @@ def main():
 
     eval_files = []
     for j in range(cfg['eval_episodes']):
-        path = f"Rou/eval_shared_p{cfg['background_period']:g}_scenario_{j}.rou.xml"
+        path = f"sumo/rou/eval_shared_p{cfg['background_period']:g}_scenario_{j}.rou.xml"
         if not os.path.exists(path):
             generate_eval_scenario(NET, path, seed=1000 + j, period=cfg['background_period'])
         eval_files.append(path)
@@ -291,7 +292,8 @@ def main():
     if method == 'cpq' and cfg['cpq_pairing'] == 'local' and cfg['cpq_group_key'] == 'ml_kem':
         # Group setup (paper: ML-KEM key distribution + key confirmation) once before round 1;
         # every vehicle gets the keys it derived itself from K_G
-        import cpq_pairing, group_setup
+        from frl.privacy import cpq_pairing
+        from frl.privacy import group_setup
         roster = [s.veh for s in slots]
         secret = cpq_pairing.seeded_group_secret(seed)
         if comm:
