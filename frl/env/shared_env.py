@@ -1,10 +1,5 @@
-# shared_env.py
-# One SUMO instance shared by all agent vehicles (design change 1).
-#
-# dqnEnv owns the simulation for a single vehicle: its step() advances SUMO
-# until that vehicle changes edge. Here SUMO is stepped centrally and every
-# agent vehicle reports when it reaches a decision point. The state comes
-# from dqnEnv unchanged.
+# One SUMO simulation shared by all learning vehicles: SUMO is stepped centrally and each vehicle
+# acts when it reaches a new edge. States are computed as in dqnenv.py.
 
 import os
 

@@ -1,18 +1,7 @@
-# attack_log.py
-# What the server observes, logged per round for the origin inference attack (attack/,
-# Attack_Exp/destination_inference_attack_spec.md, target changed to the origin). Switched on by
-# FL_ATTACK_LOG=1 (tools/run_experiment.py sets it for experiment ATK). Logging only: it saves
-# arrays run_shared.py already has and draws no random numbers, so the run is unchanged.
-#
-# <out_dir>/attack_log/
-#   meta.json               method, eps, seed, vehicles, layer names and shapes, origins, start / end
-#   agents.csv              veh, origin edge, origin label (index in the distinct sumo.start_edges),
-#                           origin x, y (start of lane 0 of the origin edge, as in the state)
-#   global/round_XXX.npy    flattened float32 global model sent to the vehicles in round XXX
-#   uploads/round_XXX.npz   every vehicle's update exactly as the server received it (the
-#                           FitRes parameters), key <veh>__<k> = k-th array:
-#                           cpq / ldpfl: the wire format (packed bits of layer 0, shape of layer 0, ...)
-#                           none / gaussian / laplace: float32 layer k
+# Logs what the server observes, for the origin inference attack (FL_ATTACK_LOG=1). Logging only;
+# the run itself is unchanged.
+# <out_dir>/attack_log/: meta.json, agents.csv (vehicle origins), global/round_XXX.npy (global model),
+# uploads/round_XXX.npz (every update as received by the server).
 
 import datetime
 import json

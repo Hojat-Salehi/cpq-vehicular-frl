@@ -1,29 +1,13 @@
-# onebit.py
-# One-bit private quantization of model updates: CPQ (correlated, paired) and LDP-FL
-# (independent), following the paper's quantization rule (Sec. "Correlated Private
-# Quantizer (CPQ)") with these choices for the public clipping interval and randomness:
+# One-bit private quantization of model updates: CPQ, CPQ-lambda and LDP-FL.
 #
-#   interval  coordinate j of layer l: [c_j - r_l, c_j + r_l] with c_j = w_g,j (the global model
-#             the client started from, already known to every client and the server) and r_l a
-#             fixed per-layer radius (config privacy.clip_radius). The client's weight is clipped
-#             to this interval, i.e. its update w - w_g is clipped to [-r_l, r_l].
-#   bit       q = 1/2 + (w - c) / (2 r alpha),  alpha = (e^eps + 1) / (e^eps - 1),
-#             b = 1{V < q} with V uniform on [0, 1).
-#   CPQ       the two clients of a pair draw the same V per coordinate from their shared pair seed;
-#             the leader uses V, the follower 1 - V (negatively correlated errors).
-#             The simple shared-seed version: the server assigns pairs and seeds (the paper's
-#             hidden pairing / ChaCha20 construction is not implemented).
-#   CPQ-lambda  (paper, "CPQ-lambda construction") each client also draws, per coordinate, a
-#             private coin C ~ Bernoulli(lambda) and a private uniform R, and uses the threshold
-#             T = V (leader) / 1 - V (follower) if C = 1, else R. lambda = 1 is plain CPQ,
-#             lambda = 0 is LDP-FL. Every bit keeps P(b = 1) = q, so decoding is unchanged.
-#             Against an observer who knows the shared randomness (e.g. a server that assigned
-#             the seeds) the privacy is eps_C = ln((e^eps + lambda) / (1 - lambda)).
-#   LDP-FL    every client draws its own independent V.
-#   decode    w_hat = c + alpha * r * (2b - 1); unbiased for the clipped weight. The server
-#             averages the decoded models of the participating clients.
-#
-# Wire format (unchanged): [packed bits of layer 0, shape of layer 0, packed bits of layer 1, ...].
+#   clip     each weight w is clipped to [c - r, c + r], c = global weight, r = privacy.clip_radius
+#   bit      b = 1{V < q},  q = 1/2 + (w - c) / (2 r alpha),  alpha = (e^eps + 1) / (e^eps - 1)
+#   LDP-FL   V uniform, independent per vehicle
+#   CPQ      the two vehicles of a pair use V and 1 - V (shared randomness, cpq_pairing.py)
+#   CPQ-l    per coordinate: the shared V with probability lambda (privacy.cpq_lambda), else a
+#            private uniform; lambda = 1 is CPQ, lambda = 0 is LDP-FL
+#   decode   w_hat = c + alpha r (2b - 1), unbiased; the server averages the decoded models
+# Wire format: [packed bits of layer 0, shape of layer 0, packed bits of layer 1, ...].
 
 import numpy as np
 

@@ -1,14 +1,5 @@
-"""Probe states for the function-space features (attack/features.py, feature set 'probe'). Run once from the repo
-root in conda env sumo_env (needs sumolib): python attack/make_probe_states.py -> attack/probe_states.npy
-
-The state layout is that of shared_env.get_state_np ('raw' encoding, 94 inputs): vehicle count per edge (30),
-mean speed per edge (30), length of lane 0 per edge (30), start of lane 0 of the current edge (x, y), start of
-lane 0 of the destination E15 (x, y). Edge order = utils.get_alledges(sumo/net/dqn.net.xml).
-
-One probe state per (edge the vehicle is on, traffic level), 30 edges x 2 levels = 60 states:
-  empty     0 vehicles, mean speed = speed limit (what SUMO reports for an empty edge)
-  busy      a third of the lane filled (length / 7.5 m * 0.33 vehicles), half the speed limit
-The attacker only needs states that mean the same in every run; it knows the map and the state code.
+"""Builds attack/probe_states.npy: 60 fixed states (30 edges x empty / busy traffic) for the 'probe'
+attack features. Run once from the repository root: python attack/make_probe_states.py
 """
 import numpy as np
 import sumolib

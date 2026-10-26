@@ -1,4 +1,5 @@
-# dqnagent.py
+# DQN agent: epsilon-greedy action selection over the feasible turns, replay memory, Huber loss,
+# target network.
 import os
 import random
 from collections import deque

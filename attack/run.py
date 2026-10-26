@@ -1,8 +1,8 @@
-"""Origin inference attack, single entry point (run from the repo root in conda env attack_env):
+"""Origin inference attack (run from the repository root in the analysis environment):
 
-    python -m attack.run --stage {features,test,attack,aggregate,plot,all} --config attack/config.yaml
+    python -m attack.run --stage all --config attack/config_ns3.yaml
 
-The "log" step of the spec is the simulation itself: tools/run_experiment.py ATK (FL_ATTACK_LOG=1).
+Input: the attack data logged by the ATKN runs (python tools/run_experiment.py ATKN).
 """
 import argparse
 import json

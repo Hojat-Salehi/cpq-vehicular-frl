@@ -1,15 +1,8 @@
-"""Features per (round, vehicle): u = observed update - global model of that round (the server knows both).
-
-cache/<run>/pos.npy   (T, V, 4 * 150) float32: fc1 weights of the state inputs 90-93 (current edge x, y;
-                      destination x, y). The Keras kernel is (inputs, units), so input i is the flat slice
-                      [i * 150, (i + 1) * 150).
-cache/<run>/full.npy  (T * V, 29653) float16, row = t * V + v: the whole update (PCA later, on training runs).
-cache/<run>/probe.npy (T, V, 60 * 3) float32: function-space features, Q_{w_g + u}(s) - Q_{w_g}(s) for the 60 fixed
-                      probe states s of attack/probe_states.npy (attack/make_probe_states.py). Unlike weights, these
-                      mean the same in every run, so a classifier can transfer from shadow runs to the target run.
-cache/<run>/labels.npy (V,) origin labels; observed.npy (T, V) bool: the server received this vehicle's update in
-                      this round (always true with ideal communication; with ns-3 undelivered updates are missing and
-                      their rows are NaN in pos / full / probe); done.json run info.
+"""Attack features per (round, vehicle), from u = received update - global model:
+  pos    fc1 weights of the position inputs (current edge and destination x, y)
+  full   the whole update (reduced with PCA later)
+  probe  Q-value change on the 60 probe states of attack/probe_states.npy
+Cached in cache/<run>/; updates the server did not receive are NaN.
 """
 import json
 import os

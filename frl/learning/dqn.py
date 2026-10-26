@@ -1,4 +1,4 @@
-# from sympy import DenseNDimArray
+# Q-network: 94 state inputs, hidden layers 150 and 100, one output per turn.
 import tensorflow as tf
 # from tensorflow.python.keras.layers import Dense
 

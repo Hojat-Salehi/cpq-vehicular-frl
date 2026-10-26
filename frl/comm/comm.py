@@ -1,35 +1,12 @@
-# comm.py
-# Model exchange over ns-3 802.11p with PQC signatures, driven by the shared SUMO world
-# (ns3.use_ns3: true in shared mode). Round structure:
-#   1. downlink drive: the RSU sends the signed global model to every vehicle that does not
-#      hold it yet, whenever the vehicle is in range of the RSU
-#   2. local training (no communication)
-#   3. uplink drive: every vehicle that trained from the current global model sends its
-#      signed, privatized update when in range
-# With privacy.cpq_group_key: ml_kem the CPQ group setup (group_setup.py) also runs over ns-3,
-# before round 1, in setup drives (run_setup): the RSU relays every setup message (stores it until
-# the recipient is in range): KEY designated vehicle -> RSU -> vehicle, CONFIRM vehicle -> RSU ->
-# designated vehicle, SETUP_OK designated vehicle -> RSU -> every vehicle.
-#
-# In range (ns3.discovery): 'beacon' (default) = the vehicle received at least ns3.beacon_min of
-# the RSU beacons (broadcast every ns3.beacon_interval s through the simulated channel) sent in
-# the last ns3.beacon_timeout s, i.e. a beacon reception ratio as link-quality estimate (a small
-# beacon is heard much farther than a large transfer can succeed); 'distance' = within
-# ns3.coverage_radius of the RSU by SUMO position (no radio discovery).
-# Distances in comm.csv always come from SUMO positions.
-# A drive is one non-learning trip (each vehicle's own model, no exploration); the end of the
-# drive is the deadline. A failed transfer is retried while the vehicle is (again) in coverage.
-# RSU scheduling: at most ns3.rsu_max_concurrent transfers run at once (default 1); vehicles in
-# coverage with something to transfer wait in a first-come queue; after each transfer a vehicle
-# rejoins at the back. (Unscheduled concurrent transfers collapse: queued chunks exceed the fixed
-# SR-ARQ timeout.) The RSU decides (collects finished transfers, checks who is in range, starts
-# the next transfer) every ns3.schedule_step s: 1.0 = only at SUMO steps (earlier runs; the RSU
-# idles until the next second after a transfer ends), 0.1 = ten times per SUMO second (closer to a
-# real RSU, which serves the next vehicle right away).
-# Delivered model packets are verified (PQC signature, round, vehicle) before they are used;
-# setup messages are verified by group_setup.py (any failure aborts the setup).
-#
-# comm.csv: one row per transfer attempt.
+# Model exchange over ns-3 (ns3.use_ns3: true). Each round:
+#   1. downlink drive: the RSU sends the signed global model to the vehicles in range
+#   2. local training
+#   3. uplink drive: vehicles that trained from the current model send their signed, privatized update
+# A vehicle is in range when it hears enough RSU beacons (ns3.beacon_*). The RSU serves one transfer at
+# a time (ns3.rsu_max_concurrent); failed transfers are retried while the vehicle is in range. Received
+# packets are verified (signature, round, vehicle) before use. With privacy.cpq_group_key: ml_kem the
+# CPQ group setup (frl/privacy/group_setup.py) also runs over ns-3 before round 1.
+# Output: comm.csv, one row per transfer attempt.
 
 import csv
 import math

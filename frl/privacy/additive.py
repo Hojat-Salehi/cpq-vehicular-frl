@@ -1,16 +1,8 @@
-# additive.py
-# Additive-noise baselines (paper, Sec. "Gaussian and Laplace Mechanisms"), on the same public
-# clipping interval as the one-bit methods (onebit.py):
-#
-#   interval  coordinate j of layer l: [w_g,j - r_l, w_g,j + r_l] (w_g = global model, r_l =
-#             privacy.clip_radius), i.e. each weight's update is clipped to [-r_l, r_l];
-#             per-coordinate sensitivity Delta_l = 2 r_l.
-#   laplace   w + Lap(0, b_l), b_l = 2 r_l / eps                       -> pure eps-PLDP
-#   gaussian  w + N(0, sigma_l^2), sigma_l = analytic Gaussian calibration (Balle & Wang 2018):
-#             the smallest sigma with
-#             Phi(D/(2s) - eps s/D) - e^eps Phi(-D/(2s) - eps s/D) <= delta   -> (eps, delta)-PLDP
-#
-# Noisy weights are sent as float32; the server averages them (plain FedAvg).
+# Gaussian and Laplace mechanisms, on the same clipping interval as onebit.py:
+#   laplace   w + Lap(2r / eps)                                     (eps-LDP per weight)
+#   gaussian  w + N(0, sigma^2), analytic Gaussian calibration
+#             (Balle and Wang, 2018)                                ((eps, delta)-LDP per weight)
+# The server averages the noisy weights.
 
 from functools import lru_cache
 

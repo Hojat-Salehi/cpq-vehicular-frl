@@ -1,4 +1,4 @@
-# main_dp_func.py
+# Random pairing of clients with shared pair seeds (server-assigned CPQ pairing).
 import numpy as np
 
 def federated_learning_pairing(n_clients, random_seed=None):

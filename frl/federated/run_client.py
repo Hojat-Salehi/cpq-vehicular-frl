@@ -1,7 +1,5 @@
-# run_client.py
-# Unified Flower client for all DP methods: none | cpq | ldpfl | gaussian | laplace
-# (cpq / ldpfl: one-bit private quantization of the update, onebit.py)
-# Usage: python run_client.py --config config.yaml --vehicle 0
+# Vehicle client: local training and privatization of the update
+# (experiment.method: none, cpq, ldpfl, gaussian, laplace).
 
 from __future__ import absolute_import, print_function
 

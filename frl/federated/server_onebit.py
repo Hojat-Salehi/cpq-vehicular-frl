@@ -1,18 +1,5 @@
-# server_onebit.py
-# Server side of the one-bit private quantizers (onebit.py): CPQ and LDP-FL.
-#
-# configure_fit: every client gets the global model; for CPQ the sampled clients are paired
-#   (main_dp_func.federated_learning_pairing, new pairs and pair seeds every round) and each
-#   pair gets a leader and a follower by coin flip. LDP-FL clients use their own randomness.
-# aggregate_fit: each client's bits are decoded relative to the global model of this round
-#   (w_g + alpha * r * (2b - 1)) and the decoded models are averaged. Optional server smoothing
-#   w_new = (1 - lambda) w_g + lambda * average (privacy.lambda_smooth, 1.0 = off; not part of
-#   the paper's algorithm).
-# Note: the server assigns the CPQ pair seeds, so it knows the shared randomness (the paper's
-# hidden-pairing protocol, which keeps it from the server, is not implemented).
-#
-# Inherits PqcFedAvg (server.py) for the old per-process layout with the ns-3 oracle: global
-# model downlink in configure_fit and, in aggregate_fit, the update delivered over ns-3.
+# Server side of CPQ, CPQ-lambda and LDP-FL: each vehicle's bits are decoded relative to the
+# round's global model and the decoded models are averaged.
 
 import time
 from typing import Dict, List, Optional, Tuple

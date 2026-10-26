@@ -1,13 +1,11 @@
-"""Launch the runs of one experiment of the paper.
+"""Launch the runs of one experiment.
 
-    python tools/run_experiment.py P1            # start (or continue) pilot P1
-    python tools/run_experiment.py E1 --eps 1    # only the eps = 1 runs of E1
-    python tools/run_experiment.py E1 --dry-run  # list the runs and their state
+    python tools/run_experiment.py E1 --dry-run   # list the runs and their state
+    python tools/run_experiment.py E1             # run them (3 in parallel)
+    python tools/run_experiment.py E1 --eps 1     # only the eps = 1 runs
 
-Run from the repo root inside conda env sumo_env. Each run = configs/base.yaml + the changes of
-that run, written to <experiment>/configs/<run>.yaml, output in <experiment>/runs/<run>/ with
-run.log and meta.json. A finished run (round_times.csv has all rounds) is skipped; an unfinished
-run folder is moved to runs/_failed/<run>_<time>/ and the run starts again from scratch.
+Each run is configs/base.yaml plus its changes; configs, run outputs and logs go to
+experiments/final/<experiment>/. Finished runs are skipped, so the command can be repeated.
 """
 import argparse
 import copy

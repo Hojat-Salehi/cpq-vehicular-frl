@@ -1,20 +1,7 @@
-# group_setup.py
-# Group-secret setup for the server-hidden CPQ pairing (paper, Appendix "Server-Hidden Pairing",
-# Algorithm "Pairing setup and shared-randomness generation"; privacy.cpq_group_key: ml_kem).
-#
-#   KEY       designated vehicle D (first in the agreed list R) -> every other vehicle u:
-#             ML-KEM-512 ciphertext to u's KEM key + K_G encrypted with ChaCha20-Poly1305 under a key
-#             derived (HKDF) from the KEM shared secret; signed by D (ML-DSA).
-#   CONFIRM   u -> D: key-confirmation tag HMAC(K_check, u | e | H(R)); signed by u.
-#   SETUP_OK  D -> every vehicle: setup complete for (e, H(R)); signed by D.
-# Every vehicle verifies everything it receives; any failure raises SetupError (abort).
-# The server only relays the messages (step 4 sends them over ns-3 via the RSU); it never holds a
-# KEM secret key, so it cannot recover K_G.
-#
-# Keys: each vehicle has a registered ML-DSA signing key pair (pqc_keys/<veh>_<scheme>.pk/.sk, as
-# for the model updates) and an ML-KEM-512 key pair (pqc_keys/<veh>_ML-KEM-512.pk/.sk).
-# K_G is given by the caller (seeded from the run seed for reproducible simulations); the KEM and
-# signature randomness is fresh, which does not change the derived pairing.
+# Group-secret setup for the CPQ pairing (privacy.cpq_group_key: ml_kem). A designated vehicle sends the
+# group secret K_G to every vehicle under ML-KEM-512 (KEY), each vehicle confirms (CONFIRM) and the
+# designated vehicle announces completion (SETUP_OK). All messages are signed (ML-DSA) and verified; any
+# failure aborts the setup. The RSU only relays the messages and cannot recover K_G.
 
 import hashlib
 import hmac

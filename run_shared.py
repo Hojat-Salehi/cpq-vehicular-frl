@@ -1,39 +1,13 @@
-# run_shared.py
-# Federated DQN with all vehicles in ONE shared SUMO world (design change 1).
+# One federated run with all learning vehicles in a single SUMO simulation.
 #
-# Replaces "one run_server.py + one run_client.py process per vehicle" with one
-# process. Per round:
-#   1. the strategy (same classes as run_server.py) configures every vehicle
-#      (pairing / roles for CPQ, true_round for the epsilon schedule)
-#   2. each vehicle's flowerClient.begin_round() loads the global model
-#   3. all vehicles train together for total_episodes shared episodes
-#   4. each vehicle's flowerClient.end_round() privatizes its update
-#   5. strategy.aggregate_fit() builds the new global model
-#   6. the global model is evaluated greedily, all vehicles in the shared world
+# Each round the vehicles start from the global model, train together for common.total_episodes
+# episodes and privatize their updates (experiment.method); the server aggregates them and the new
+# global model is evaluated greedily. With ns3.use_ns3: true the models are exchanged over ns-3
+# 802.11p with PQC signatures (frl/comm/comm.py) and only verified updates are aggregated.
 #
-# With ns3.use_ns3: true the model exchange is simulated (comm.py): the global model is
-# delivered during a downlink drive before training and the updates during an uplink drive
-# after it, over ns-3 802.11p with PQC signatures, from the vehicles' SUMO positions to one
-# RSU. Only verified updates from vehicles that trained from the current global model are
-# aggregated; a vehicle that missed the downlink keeps training its own previous model.
-# With use_ns3: false the exchange is ideal (instant, every vehicle participates).
-#
-# Agents depart after a warm-up of sumo.warmup seconds, at random times within
-# sumo.depart_window (re-drawn every training episode, fixed per evaluation
-# scenario). Before round 1 the evaluation scenarios are also run with two
-# non-learning baselines (shortest route, re-routing on current travel times)
-# and without agents.
-#
-# Outputs (out_dir): vehK_train.csv / vehK_eval.csv (one row per vehicle per
-# episode, see shared_train.CSV_HEADER), global_eval.csv, round_times.csv,
-# baselines.csv + baseline_eval.csv (same columns, per baseline policy),
-# background.csv (non-agent traffic in each evaluation scenario over the fixed
-# window [warmup, warmup + depart_window + max_trip_time], with
-# experiment.background_metrics) and
-# road_log.csv (per vehicle per edge, with experiment.road_log).
-#
-# Usage: python run_shared.py --config configs/base.yaml
-# FL_SEED / FL_OUT_DIR / FL_RUN_ID come from the environment (tools/run_experiment.py sets them).
+# Usage: FL_SEED=1 FL_OUT_DIR=results/run1 python run_shared.py --config configs/base.yaml
+# Outputs in FL_OUT_DIR: global_eval.csv (evaluation per round), vehK_train.csv / vehK_eval.csv,
+# baselines.csv, round_times.csv; with ns-3 also comm.csv and participation.csv.
 
 import os
 os.environ.setdefault('CUDA_VISIBLE_DEVICES', '')

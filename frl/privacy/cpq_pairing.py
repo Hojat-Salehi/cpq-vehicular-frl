@@ -1,26 +1,9 @@
-# cpq_pairing.py
-# Per-coordinate CPQ pairing (paper, Appendix "Server-Hidden Pairing", HiddenPairValue), derived
-# locally by every client from a pairing key, the round and the agreed ordered participant list:
-#
-#   for every coordinate j:  s_u = PRF_{K_pair}(t, j, u) for every participant u; sort by s_u
-#   (ties by list position); the client at 0-based position p is paired with the client at p ^ 1;
-#   pair l = p // 2 gets V = UniformPRF_{K_coin}(t, j, l); even position uses V, odd 1 - V;
-#   with an odd number of participants the last position is unpaired (private V).
-#
-# PRF = ChaCha20 keystream: one stream per (round, participant) gives that participant's sort keys
-# for all coordinates, one stream per (round, pair) gives the pair's V for all coordinates.
-# V is continuous (53-bit uniform floats; the paper's d-bit finite-precision rule is not used).
-#
-# Keys (privacy.cpq_pairing):
-#   server  the keys come from a pairing seed the server sends, so the server can reproduce them.
-#   local   the vehicles derive K_pair, K_coin, K_check with HKDF-SHA256 from their group secret K_G,
-#           the epoch and the agreed ordered list of vehicles (paper: KDF step of the setup); the
-#           server never receives anything that lets it reproduce the pairing or V. The pairing is
-#           over the whole agreed group, whoever takes part in a round.
-#   K_G (privacy.cpq_group_key): seeded = derived from the run seed (reproducible, simulation only).
-# Granularity: coordinate = a new ordering per coordinate (paper); client = one ordering per round
-# for all coordinates (only used with local keys; the server-assigned per-client pairing lives in
-# server_onebit.py).
+# Server-hidden per-coordinate pairing for CPQ. From the group keys, the round and the agreed list of
+# vehicles, every vehicle derives its partner and the shared uniform V for each coordinate (ChaCha20 as
+# PRF); the server cannot reproduce them.
+#   privacy.cpq_pairing    local: keys derived from the group secret K_G; server: keys from a seed
+#                          sent by the server
+#   privacy.cpq_group_key  ml_kem: K_G from the group setup (group_setup.py); seeded: from the run seed
 
 import hashlib
 from functools import lru_cache

@@ -1,10 +1,8 @@
 ---
-# Base config of the experiments in the paper.
-# Every run = this file + the changes listed for that run in tools/run_experiment.py
-# (method, privacy epsilon, seed via FL_SEED, ns-3 on/off, ...). Every key is written out,
-# so no run depends on a code default. Do not edit after E1 has started.
-# DQN hyperparameters that are not here are fixed in dqnagent.py / dqn.py (learning rate 1e-3,
-# batch 32, replay 20000, training starts at 200 transitions, layers 150 / 100).
+# Configuration shared by all experiments of the paper. Each run is this file plus the changes listed
+# for it in tools/run_experiment.py (method, privacy budget, ns-3 on/off, ...); the seed comes from FL_SEED.
+# DQN settings not listed here are in frl/learning/ (learning rate 1e-3, batch 32, replay memory 20000,
+# training starts after 200 transitions, hidden layers 150 / 100).
 
 common:
   cfg_file : sumo/dqn.sumocfg
@@ -19,7 +17,7 @@ sumo:
   quit_on_end : true
   num_clients : 50
   shared_env : true         # all vehicles in one SUMO world, one process (run_shared.py)
-  background_period : 1.75  # s between background vehicle departures (pilot P1: none learns at 1.75, not at 1.5)
+  background_period : 1.75  # s between background vehicle departures
   warmup : 200              # s of background traffic before the agents can depart
   depart_window : 100       # each agent departs at a random time in [warmup, warmup + depart_window]
   use_gui : False
@@ -29,7 +27,7 @@ experiment:
   method : "none"           # set per run: none | cpq | ldpfl | gaussian | laplace
   true_rounds : 100
   batches_per_agg : 1
-  out_dir : "results"       # not used: the launcher sets FL_OUT_DIR
+  out_dir : "results"       # output folder is set by FL_OUT_DIR
   epsilon_schedule : "exponential"
   epsilon_start : 1.0
   epsilon_end : 0.05
@@ -44,14 +42,14 @@ experiment:
   seeds : [1, 2, 3, 4, 5]   # the launcher sets FL_SEED per run
 
 privacy:
-  epsilon : 1.0             # set per run: 1 | 3 | 5 | 7 | 10
+  epsilon : 1.0             # set per run: 0.3 | 0.5 | 1 | 2 | 5
   delta : 1.0e-5
   cpq_pairing_granularity : coordinate
   cpq_pairing : local
-  cpq_group_key : seeded    # ns-3 runs use ml_kem (real setup over the RSU; same keys)
-  cpq_lambda : 1.0
-  lambda_smooth : 1.0
-  clip_radius :             # confirmed by pilot P1 (update p99.5 ~0.02-0.03, 0.3-1% of weights clipped)
+  cpq_group_key : seeded    # ns-3 runs use ml_kem (group setup over the RSU)
+  cpq_lambda : 1.0          # CPQ-lambda: 0.75 in the paper; 1 = CPQ
+  lambda_smooth : 1.0       # 1 = plain average of the decoded updates
+  clip_radius :             # per layer, r in the paper
     fc1.weight : 0.02
     fc1.bias : 0.02
     fc2.weight : 0.02
@@ -60,14 +58,14 @@ privacy:
     fc_out.bias : 0.02
 
 ns3:
-  use_ns3 : false           # set per run: true in E2, E3
+  use_ns3 : false           # true in E2, E3 and the attack runs
   pqc_scheme : "ML-DSA-44"
   key_dir : "pqc_keys"
   oracle_ip : "127.0.0.1"
   oracle_port : 12345
   downlink_base_port : 25000
   ns3_dir : "~/ns-3.46"
-  fl_sim_args : ""          # edge-limited channel (coverage ends ~150-200 m)
+  fl_sim_args : ""          # extra fl-sim options (default channel: coverage ends at about 150-200 m)
   rsu_junction : "J3"
   discovery : beacon
   beacon_interval : 0.1
@@ -76,5 +74,5 @@ ns3:
   coverage_radius : 150     # only for discovery: distance
   rsu_max_concurrent : 1
   schedule_step : 0.1
-  setup_max_drives : 20     # PILOT P2 decides (50-vehicle CPQ group setup)
+  setup_max_drives : 20     # CPQ group setup must finish within this many drives
   drop_undelivered : true

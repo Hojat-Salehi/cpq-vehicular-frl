@@ -1,15 +1,6 @@
-# mse_log.py
-# Empirical aggregation error of the privacy mechanism, per round, for the CPQ-lambda ablation
-# (A1). Switched on by FL_MSE_LOG=1 (tools/run_experiment.py). Logging only: it uses arrays
-# run_shared.py already has and draws no random numbers, so the run is unchanged.
-#
-# <out_dir>/mse.csv, one row per round:
-#   round, aggregated   number of updates the server averaged
-#   mse                 mean over all weights of (server aggregate - reference)^2
-#   mse_<layer>         the same per layer
-# reference = the base model + the average of the clipped updates clip(w_i - base_i, -r, r) of the
-# vehicles the server averaged, i.e. what the server would get without privacy noise (the one-bit
-# and additive mechanisms are unbiased for this value). Clipping itself is therefore not counted.
+# Empirical aggregation MSE per round, for the CPQ-lambda ablation (FL_MSE_LOG=1). Logging only.
+# <out_dir>/mse.csv: round, number of aggregated updates, and the mean squared difference between the
+# server aggregate and the average of the clipped updates (overall and per layer).
 
 import os
 

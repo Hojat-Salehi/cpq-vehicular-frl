@@ -1,6 +1,6 @@
-"""Single loader of what the server observed (attack_log.py). The attack reads only this module:
-received updates, the global model, public parameters (clip radius, eps, mechanism) and the labels
-in agents.csv (used for the training runs and for scoring only)."""
+"""Loader of what the server observed (frl/monitoring/attack_log.py): received updates, global models,
+public parameters and the vehicle origins (used for training runs and scoring only).
+"""
 import csv
 import glob
 import json

@@ -9,3 +9,4 @@ sumo/add/*.out
 # generated routes (sumo/rou/empty.rou.xml is part of the code)
 sumo/rou/*
 !sumo/rou/empty.rou.xml
+figures/output/

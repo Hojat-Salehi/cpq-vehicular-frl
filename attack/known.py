@@ -1,29 +1,9 @@
-"""Attack 1, known vehicles: inside one run, the server knows the origin of some vehicles from side information
-(honest members whose home is public; the server does not hold their keys, so not the CPQ group secret) and infers
-the origin of every other vehicle of the same run. All vehicles start each round from the same global model, so
-their updates are directly comparable (this is what fails across runs: independently initialised networks have
-unaligned hidden units).
+"""Attack 1, known vehicles: the server knows the origin of a few vehicles of a run (known_per_origin
+in the attack config) and infers the origin of the others from their updates in rounds 1..k.
 
-Known vehicles: known_per_origin vehicles of every origin (e.g. 1 per origin = 10 of 50 vehicles with 10 origins),
-known_draws random choices per run.
-
-Online: after k rounds the attacker uses rounds 1..k only, of the known vehicles (training) and of the target
-vehicles (prediction), and only the updates it actually received (ns-3: undelivered updates are missing). Labels of
-target vehicles are used only for scoring; every target vehicle is scored, also one never received (random guess).
-
-Features per (round, vehicle), centred per round (minus the mean over the vehicles received in that round, which
-the server can compute; removes what all vehicles share):
-  pos    fc1 weights of the state inputs 90-93 (600 values)
-  full   the whole update, PCA fitted on the received updates of rounds 1..k (no labels needed)
-  probe  Q-value change on the 60 probe states (180 values)
-Methods: A = per-round L2 logistic regression, log-probabilities summed over the received rounds in 1..k;
-B = logistic regression on the average of the received rounds in 1..k (trained on the known vehicles' averages
-over rounds 1..k and over random subsets of them). Headline variant per (draw, k): chosen on the known vehicles only
-(two balanced halves, train on one and score the other, both ways); with one known vehicle per origin no split is
-possible and the headline is fixed in advance to cfg['known_default'] (A with probe, the best variant on average at
-one known vehicle per origin in the 5-origin ideal-network data, which is independent of the ns-3 runs).
-Control: the headline variant trained with the known vehicles' labels permuted, averaged over control_perms
-permutations (expected accuracy 1/K).
+Features: fc1 weights of the position inputs (pos), the whole update after PCA (full), or Q-value changes
+on fixed probe states (probe). Method A sums per-round classifier log-probabilities; method B classifies
+the k-round average. A control with permuted labels gives the chance level.
 """
 import numpy as np
 from sklearn.decomposition import PCA

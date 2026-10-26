@@ -1,26 +1,8 @@
-# shared_train.py
-# Episode loop for agent vehicles in one SUMO world. Used by both layouts:
-# run_shared.py (all vehicles in one world) and run_client.py (one vehicle per
-# process, each with its own SUMO).
-#
-# Departures: background traffic runs alone during a warm-up; each agent then
-# departs at its own scheduled time (drawn in [warmup, warmup + depart_window]
-# by the caller: re-drawn every training episode, fixed per evaluation scenario).
-#
-# Decisions: a decision point is a new (non-internal) edge seen before a
-# simulation step; the agent decides after that step (timing of the original
-# dqnEnv.step). The agent picks the next edge from the current edge's connections.
-#
-# Reward: minus the measured simulation seconds between two decision points
-# (edge entries), plus revisit penalties (-10 on the 2nd visit of an edge,
-# -50 from the 3rd). Without penalties the episode's rewards sum to -Travel_Time.
-#
-# Episode end per agent: it enters the destination edge (terminal), reaches a
-# dead end, or leaves the network; or its trip time limit t_max, counted from
-# its scheduled departure, runs out ('time_limit', stored as a truncated,
-# non-terminal transition so the DQN bootstraps from it; 'not_departed' if it
-# never got into the network). Done agents are removed (or arrive); the episode
-# ends when all agents are done, and the simulation is reloaded for the next one.
+# Episode loop for the learning vehicles in one SUMO simulation.
+# Background traffic runs alone for sumo.warmup seconds; each vehicle then departs at a random time
+# within sumo.depart_window. At each new edge the vehicle chooses the next edge. Reward: minus the
+# time since the last decision, with penalties for revisiting an edge. A vehicle's episode ends at the
+# destination, at a dead end, or after experiment.max_trip_time seconds.
 
 import heapq
 import os

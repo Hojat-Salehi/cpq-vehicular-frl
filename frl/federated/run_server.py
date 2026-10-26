@@ -1,6 +1,4 @@
-# run_server.py
-# Unified server entry point — picks the right FL strategy from config.yaml
-# Usage: python run_server.py --config configs/base.yaml
+# Aggregation strategy for each privacy method (used by run_shared.py).
 
 import os
 import argparse

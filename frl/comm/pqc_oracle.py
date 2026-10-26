@@ -1,4 +1,4 @@
-# pqc_oracle.py
+# PQC-signed model updates for the per-process client/server layout.
 import os
 import csv
 import time

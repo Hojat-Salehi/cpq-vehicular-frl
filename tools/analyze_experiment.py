@@ -1,14 +1,9 @@
-"""Derive the result tables of one final experiment from its raw run folders.
+"""Result tables of one experiment from its run folders.
 
     python tools/analyze_experiment.py experiments/final/E1_privacy_utility [--window 10]
 
-Reads <experiment>/runs/<run>/ (never changes it) and writes into <experiment>/results/:
-  summary.csv            one row per finished run (settings, final-window metrics, convergence, ...)
-  grouped.csv            mean and 95% confidence half-width over seeds per setting (t distribution),
-                         and the same for the difference to the no-privacy run of the same seed
-  curves_<metric>.csv    round x run, for travel_time_mean, arrival_rate, time_loss_mean
-It also prints the checks: rounds complete, exit code, Traceback / NaN in the log, finite weights,
-identical baselines for runs with the same traffic.
+Writes <experiment>/results/: summary.csv (one row per run, metrics averaged over the last 10 rounds),
+grouped.csv (mean and 95% CI over seeds per setting) and curves_<metric>.csv (one value per round).
 """
 import argparse
 import json

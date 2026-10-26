@@ -1,10 +1,5 @@
 #!/usr/bin/env python
-# tools/summarize_run.py
-# Text summary of one run directory written by run_shared.py:
-#   python tools/summarize_run.py experiments/runs/<run>  [--window 10]
-# Sections (each only if its files exist): setup, model performance (evaluation of the global
-# model vs the baselines), convergence, training episodes, communication (ns-3), background
-# traffic, wall-clock time. The summary is also written to <run>/summary.txt.
+# Text summary of one run folder: python tools/summarize_run.py <run folder> [--window 10]
 
 import argparse
 import io

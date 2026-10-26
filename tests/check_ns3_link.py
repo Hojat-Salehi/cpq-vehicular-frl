@@ -1,6 +1,6 @@
 # tests/check_ns3_link.py
 # Checks for ns-3 lockstep mode (fl-sim --lockstep, ns3_link.py) and the communication drives
-# (comm.py). Needs the fl-sim binary (ns3/README_NS3.md).
+# (comm.py). Needs the fl-sim binary (ns3/README.md).
 #   python tests/check_ns3_link.py        (inside sumo_env, from the repo root)
 #
 # 1. motion       positions and constant-velocity motion set from Python are what ns-3 uses
