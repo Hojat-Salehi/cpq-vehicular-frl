@@ -1,0 +1,80 @@
+---
+# Base config of the experiments in the paper.
+# Every run = this file + the changes listed for that run in tools/run_experiment.py
+# (method, privacy epsilon, seed via FL_SEED, ns-3 on/off, ...). Every key is written out,
+# so no run depends on a code default. Do not edit after E1 has started.
+# DQN hyperparameters that are not here are fixed in dqnagent.py / dqn.py (learning rate 1e-3,
+# batch 32, replay 20000, training starts at 200 transitions, layers 150 / 100).
+
+common:
+  cfg_file : dqn.sumocfg
+  port : 8080
+  server_ip : 127.0.0.1
+  total_episodes : 10       # training episodes per round
+  log_level : info
+  plot_results : False
+
+sumo:
+  start : true
+  quit_on_end : true
+  num_clients : 50
+  shared_env : true         # all vehicles in one SUMO world, one process (run_shared.py)
+  background_period : 1.75  # s between background vehicle departures (pilot P1: none learns at 1.75, not at 1.5)
+  warmup : 200              # s of background traffic before the agents can depart
+  depart_window : 100       # each agent departs at a random time in [warmup, warmup + depart_window]
+  use_gui : False
+  start_edges : [['E0'], ['E1'], ['E3'], ['E11'], ['E8']]
+
+experiment:
+  method : "none"           # set per run: none | cpq | ldpfl | gaussian | laplace
+  true_rounds : 100
+  batches_per_agg : 1
+  out_dir : "results"       # not used: the launcher sets FL_OUT_DIR
+  epsilon_schedule : "exponential"
+  epsilon_start : 1.0
+  epsilon_end : 0.05
+  epsilon_decay_rounds : 80
+  eval_episodes : 3
+  state_encoding : raw
+  max_trip_time : 600
+  background_metrics : true
+  road_log : false
+  target_update_every : 1000
+  mask_target : false
+  seeds : [1, 2, 3, 4, 5]   # the launcher sets FL_SEED per run
+
+privacy:
+  epsilon : 1.0             # set per run: 1 | 3 | 5 | 7 | 10
+  delta : 1.0e-5
+  cpq_pairing_granularity : coordinate
+  cpq_pairing : local
+  cpq_group_key : seeded    # ns-3 runs use ml_kem (real setup over the RSU; same keys)
+  cpq_lambda : 1.0
+  lambda_smooth : 1.0
+  clip_radius :             # confirmed by pilot P1 (update p99.5 ~0.02-0.03, 0.3-1% of weights clipped)
+    fc1.weight : 0.02
+    fc1.bias : 0.02
+    fc2.weight : 0.02
+    fc2.bias : 0.02
+    fc_out.weight : 0.02
+    fc_out.bias : 0.02
+
+ns3:
+  use_ns3 : false           # set per run: true in E2, E3
+  pqc_scheme : "ML-DSA-44"
+  key_dir : "pqc_keys"
+  oracle_ip : "127.0.0.1"
+  oracle_port : 12345
+  downlink_base_port : 25000
+  ns3_dir : "~/ns-3.46"
+  fl_sim_args : ""          # edge-limited channel (coverage ends ~150-200 m)
+  rsu_junction : "J3"
+  discovery : beacon
+  beacon_interval : 0.1
+  beacon_timeout : 0.5
+  beacon_min : 3
+  coverage_radius : 150     # only for discovery: distance
+  rsu_max_concurrent : 1
+  schedule_step : 0.1
+  setup_max_drives : 20     # PILOT P2 decides (50-vehicle CPQ group setup)
+  drop_undelivered : true

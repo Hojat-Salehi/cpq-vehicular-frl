@@ -1,0 +1,6 @@
+# Result tables, attack analysis and figures
+numpy==1.26.4
+pandas==2.3.3
+pyyaml==6.0.3
+scikit-learn==1.5.2
+matplotlib==3.10.9

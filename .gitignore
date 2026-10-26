@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+experiments/
+results/
+log/
+pqc_keys/
+pqc_logs/
+Add/*.out
+# generated routes (Rou/empty.rou.xml is part of the code)
+Rou/*
+!Rou/empty.rou.xml

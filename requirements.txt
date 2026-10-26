@@ -1,0 +1,10 @@
+# Simulation (versions used for the paper)
+numpy==1.26.4
+scipy==1.15.2
+pyyaml==6.0.3
+tensorflow==2.21.0
+flwr==1.29.0
+eclipse-sumo==1.26.0
+cryptography==46.0.7
+# liboqs-python needs the liboqs C library (0.15.0); see https://github.com/open-quantum-safe/liboqs-python
+liboqs-python==0.14.1
