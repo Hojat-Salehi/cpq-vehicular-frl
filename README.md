@@ -1,5 +1,7 @@
 # Communication-Efficient Private Federated Reinforcement Learning with Post-Quantum Authentication for Vehicular Networks
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23693204.svg)](https://doi.org/10.5281/zenodo.23693204)
+
 Code for the paper of the same title. Vehicles learn a routing policy with federated deep Q-learning in
 SUMO and exchange their models with a road-side unit (RSU). The model updates are protected with
 one-bit private quantization (CPQ, CPQ-λ, LDP-FL) or with Gaussian / Laplace noise, signed with
@@ -36,6 +38,8 @@ All commands are run from the repository root.
 Tested on Ubuntu 20.04 with Python 3.10, SUMO 1.26.0, liboqs 0.15.0 and ns-3.46.
 
 ```bash
+git clone https://github.com/solidlabnetwork/cpq-vehicular-frl.git
+cd cpq-vehicular-frl
 conda create -n cpq-frl python=3.10
 conda activate cpq-frl
 pip install -r requirements.txt
@@ -150,9 +154,10 @@ trained on shadow runs reaches 30% accuracy against CPQ and 22% against LDP-FL a
 
 ## Results archive (Zenodo)
 
-The outputs of all runs behind the paper are archived on Zenodo: DOI to be added. There is one zip file per
-experiment, named after the output folders above; each unpacks into `experiments/final/<folder>/`. To reproduce
-the tables and figures without running the simulations:
+The outputs of all runs behind the paper are archived on Zenodo:
+[10.5281/zenodo.23693204](https://doi.org/10.5281/zenodo.23693204). There is one zip file per experiment, named
+after the output folders above; each unpacks into `experiments/final/<folder>/`. To reproduce the tables and
+figures without running the simulations:
 
 ```bash
 unzip E1_privacy_utility.zip                     # in the repository root; likewise the other zip files
